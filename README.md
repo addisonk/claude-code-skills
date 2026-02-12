@@ -33,6 +33,7 @@ Open-source skills for [Claude Code](https://claude.ai/code).
 | [browser-test-review](dev-tools/browser-test-review) | Review completed features by testing them in the browser |
 | [file-suggestion](dev-tools/file-suggestion) | File search using rg + fzf |
 | [v0-spec-pack-extractor](dev-tools/v0-spec-pack-extractor) | Extract spec packs from any codebase (routes, components, data models) |
+| [presentational-components](dev-tools/presentational-components) | Enforce presentational UI component patterns with domain-focused hooks |
 
 ### Services
 
