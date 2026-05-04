@@ -13,7 +13,9 @@ Components must NOT contain:
 - `useQuery` or `useMutation` (Convex)
 - `useUser` (Clerk)
 - `useRouter` for navigation logic
-- Any data fetching or side effects
+- Any data fetching or external side effects
+
+Local UI state via `useState` (form input, dropdown open/closed, hover) is fine — that's presentation, not data.
 
 ## Naming
 
@@ -118,6 +120,22 @@ The component receives flags (`canDelete`, `isLiked`) and callbacks (`onDelete`,
 
 1. **Start with the presentational component** — define props interface with all needed data and callbacks
 2. **Create a domain-focused hook** in `hooks/` — name it after the data domain, not the UI component
+
+## Presentational Blocks
+
+A **block** is a copy-pasteable composition that ships a complete UI section (dashboard, sign-in, feed) — a folder of presentational components plus one wiring page. Follows the [shadcn/ui blocks](https://ui.shadcn.com/blocks) convention.
+
+The same rules apply at the block level: components stay presentational, the block's `page.tsx` is the only file that calls hooks, and mock data lives alongside so the block previews without providers.
+
+For folder layout, the block-vs-component decision, and a worked example, see [`references/blocks.md`](references/blocks.md).
+
+## Templates
+
+Starter scaffolds in `templates/`:
+
+- [`templates/component.tsx`](templates/component.tsx) — presentational component
+- [`templates/domain-hook.ts`](templates/domain-hook.ts) — domain-focused hook
+- [`templates/block/`](templates/block) — full shadcn-style block scaffold (page + components + mock data)
 
 ## Benefits
 

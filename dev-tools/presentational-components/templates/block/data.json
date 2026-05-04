@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "id": "1",
+      "author": "Ada Lovelace",
+      "content": "Just shipped a new analytical engine module.",
+      "likes": 12,
+      "createdAt": "2026-05-04T09:00:00Z"
+    },
+    {
+      "id": "2",
+      "author": "Grace Hopper",
+      "content": "A ship in port is safe, but that's not what ships are built for.",
+      "likes": 47,
+      "createdAt": "2026-05-04T11:30:00Z"
+    },
+    {
+      "id": "3",
+      "author": "Alan Turing",
+      "content": "Sometimes it is the people no one imagines anything of who do the things that no one can imagine.",
+      "likes": 23,
+      "createdAt": "2026-05-04T14:15:00Z"
+    }
+  ]
+}
