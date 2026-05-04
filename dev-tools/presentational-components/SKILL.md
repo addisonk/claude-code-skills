@@ -78,6 +78,42 @@ export default function CommunityPage({ params }) {
 }
 ```
 
+## Worked Examples
+
+### Simple: data + single action
+
+Pass shaped data and named callbacks explicitly:
+
+```tsx
+<JoinCard
+  community={{ name: "...", memberCount: 123 }}
+  isMember={false}
+  onJoin={handleJoin}
+/>
+```
+
+Or spread the hook result when the hook already returns the props the component expects:
+
+```tsx
+const props = useCommunity({ communitySlug: "my-community" });
+return <JoinCard {...props} />;
+```
+
+### Richer: permissions + multiple mutations
+
+When a hook needs to compute permissions and own multiple mutations, take context as input and return everything the component needs as plain values and callbacks:
+
+```tsx
+// hooks/use-post-actions.ts
+const actions = usePostActions({ post, communitySlug, communityOwnerId });
+// → { canDelete, canEdit, onDelete, onLike, isLiked, ... }
+
+// Page:
+return <PostCard {...actions} post={post} communitySlug={communitySlug} />;
+```
+
+The component receives flags (`canDelete`, `isLiked`) and callbacks (`onDelete`, `onLike`) — never raw mutations, auth state, or routing.
+
 ## Adding New Components
 
 1. **Start with the presentational component** — define props interface with all needed data and callbacks
