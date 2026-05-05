@@ -25,7 +25,7 @@ Adapted from Justin McCarthy's "Software Factory" pattern at StrongDM AI (factor
 | **Fan-out Research** | Human pastes one prompt into ChatGPT, Claude, and Gemini *deep research* modes in parallel. Each tool sees a different slice of the web; coverage is union-of-tools, not best-of. |
 | **Token Cache** | Download every source once into local files. Future agents read from disk, not from the network. Reconstitutable from a manifest, so it's gitignored. |
 | **Semantic Index** | A multi-level index (topics, citations, cross-refs, tags, clusters, themes) over the corpus. Lets the next agent build context efficiently instead of re-reading everything. |
-| **Critic Application** | A domain-specific validator agent that checks downstream outputs against the indexed prior art. Built later, on top of the index. |
+| **Critic Application** | A deliberately adversarial validator agent — a "super negative" persona whose job is to poke holes. Reads the semantic index and tears into proposed designs, specs, or outputs using the prior art as ammunition ("paper X already showed this fails", "repo Y took the opposite approach because…"). Built later, on top of the index. |
 
 ## Core Workflow
 
