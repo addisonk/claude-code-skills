@@ -102,6 +102,33 @@ dense and useful aspects of our prior art materials. Be sure to use
 sub-agents for each project - think MapReduce.
 ```
 
+### 5. Critic Application (optional, run on demand)
+
+Run this against any proposed design, spec, plan, or output once the index exists. The persona is deliberately negative — its job is to find every reason this fails, using the prior art as ammunition. Save outputs to `docs/research/critiques/<slug>.md` so prior critiques inform later ones.
+
+> **Speculative wording — not from source. Replace when the canonical prompt is available.**
+
+```
+You are an adversarial critic. Your job is to find every reason the proposed
+[design / spec / plan / output] below will fail, miss important context, or
+duplicate prior work. Be specific, harsh, and concrete - do not hedge.
+
+Read docs/research/index/ to load the prior-art context, then dive into the
+underlying sources in inspiration/ when you need to substantiate a claim.
+
+For each criticism, cite the specific paper, repo, doc, or thread from the
+index that backs it. Use the form:
+  - Issue: <what's wrong>
+  - Evidence: <citation from index/inspiration with one-line quote or paraphrase>
+  - Implication: <what breaks, gets duplicated, or gets contradicted>
+
+End with a ranked list of the top 5 issues that would make you reject this
+work outright if you were the reviewer. No closing pleasantries.
+
+Target under review:
+<paste design / spec / plan / output here>
+```
+
 ## Resulting Layout
 
 ```
@@ -113,7 +140,8 @@ project/
 │       ├── claude.md               # deep-research export, pasted by human
 │       ├── gemini.md               # deep-research export, pasted by human
 │       ├── downloads.yaml          # idempotent manifest, source of truth
-│       └── index/                  # semantic index (topics, tags, clusters, xrefs)
+│       ├── index/                  # semantic index (topics, tags, clusters, xrefs)
+│       └── critiques/              # adversarial reviews, one file per target
 ├── inspiration/                    # gitignored token cache
 └── .gitignore                      # contains inspiration/
 ```
