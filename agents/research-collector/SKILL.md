@@ -1,11 +1,11 @@
 ---
 name: research-collector
-description: Use when starting a new project, feature, or research-heavy task that benefits from prior art (arxiv papers, OSS repos, product docs). Turns a fresh IDEA.md / SEED.md / README.md into a curated, deduplicated, semantically indexed local corpus that downstream agents can draw from. Triggers include "gather prior art", "research the space", "what already exists for X", "fan-out research", "Software Factory", "Attractor", "Fabro", "Kilroy".
+description: Use when starting a new project, feature, or research-heavy task that benefits from prior art (arxiv papers, OSS repos, product docs). Turns a fresh idea into a curated, deduplicated, semantically indexed local corpus that downstream agents can draw from. Triggers include "gather prior art", "research the space", "what already exists for X", "fan-out research", "Software Factory", "Attractor", "Fabro", "Kilroy".
 ---
 
 # Research Collector
 
-Four-stage workflow that converts a one-paragraph project idea into a dense, locally cached, indexed corpus of prior art. Each stage hands off to the next via files on disk so the work is resumable, idempotent, and reusable across agents.
+Five-stage workflow that converts a one-paragraph project idea into a dense, locally cached, indexed corpus of prior art. The middle of the pipeline is **human-in-the-loop**: stage 1 produces a short prompt that the human pastes into ChatGPT, Claude, and Gemini's *deep research* (web) modes. The agent picks up again once the human drops the outputs into `docs/research/`.
 
 Adapted from Justin McCarthy's "Software Factory" pattern at StrongDM AI (factory.strongdm.ai). Implemented end-to-end by Fabro (fabro.sh) and Kilroy (github.com/danshapiro/kilroy).
 
@@ -22,18 +22,21 @@ Adapted from Justin McCarthy's "Software Factory" pattern at StrongDM AI (factor
 
 | Pattern | What it is |
 |---|---|
-| **Fan-out Research** | Use ChatGPT, Gemini, and Claude *deep research* (web modes) in parallel. Each tool sees a different slice of the web; coverage is union-of-tools, not best-of. |
-| **Token Cache** | Download every source once into local files. Future agents read from disk, not from the network. The cache is reconstitutable from a manifest, so it's gitignored. |
+| **Fan-out Research** | Human pastes one prompt into ChatGPT, Claude, and Gemini *deep research* modes in parallel. Each tool sees a different slice of the web; coverage is union-of-tools, not best-of. |
+| **Token Cache** | Download every source once into local files. Future agents read from disk, not from the network. Reconstitutable from a manifest, so it's gitignored. |
 | **Semantic Index** | A multi-level index (topics, citations, cross-refs, tags, clusters, themes) over the corpus. Lets the next agent build context efficiently instead of re-reading everything. |
 | **Critic Application** | A domain-specific validator agent that checks downstream outputs against the indexed prior art. Built later, on top of the index. |
 
 ## Core Workflow
 
 ```
-IDEA.md / SEED.md / README.md
-            │
+            ┌──── 0. Ask the user (interactive)
+            │     "What are we researching, and where's the seed doc?"
             ▼
-   1. Research Brief  ──► docs/research/<deep-research-output>.md
+   1. Research Brief  ──► simple prompt printed to chat
+            │              (human pastes into ChatGPT + Claude + Gemini deep research)
+            ▼
+   ─── HUMAN STEP: run deep research on all 3, save results to docs/research/ ───
             │
             ▼
    2. Download Manifest  ──► docs/research/downloads.yaml   (idempotent)
@@ -45,22 +48,44 @@ IDEA.md / SEED.md / README.md
    4. Semantic Index  ──► docs/research/index/   (topics, tags, clusters, xrefs)
 ```
 
-Run stages in order. Each stage has a canonical prompt — use it verbatim or close to it.
+### 0. Ask the User (always start here)
+
+Before doing anything else, ask one question to anchor the corpus. Use [AskUserQuestion](#) if available, otherwise plain prose:
+
+> **What's the project, and where should I read the seed from?**
+> - Option A: read an existing file (e.g. `IDEA.md`, `SEED.md`, `README.md`) — give me the path
+> - Option B: paste the idea inline now (a paragraph is fine)
+> - Option C: I don't have one yet — help me write a `SEED.md` first
+
+Do not proceed past stage 1 until the seed exists on disk. The brief is only as good as the seed.
 
 ### 1. Research Brief
 
-Generate a brief, then fan it out to multiple deep-research agents (ChatGPT, Gemini, Claude web research) in parallel. Each result lands as a new file under `docs/research/`.
+Read the seed and produce **one short, plain-English prompt** the user can copy into a deep-research UI. Keep it under ~10 lines. Do not include framework jargon, do not reference local file paths, do not assume the model has access to the repo. Imagine pasting it into a fresh browser tab.
+
+Print it to chat in a fenced block, then tell the user:
+
+> Run this prompt in **deep research mode** on all three:
+> - ChatGPT — chatgpt.com → Tools → "Deep research"
+> - Claude — claude.ai → "Research"
+> - Gemini — gemini.google.com → "Deep Research"
+>
+> When each finishes, save/export the result as markdown into `docs/research/` (one file per tool, e.g. `chatgpt.md`, `claude.md`, `gemini.md`). Tell me when at least one has landed and I'll continue.
+
+Canonical brief-generator prompt (run inside Claude Code):
 
 ```
-Look at our [IDEA.md, SEED.md, README.md]. Write a research brief which will
-instruct a deep research agent to identify all useful prior art, especially
-arxiv.org papers, git repos, product documentation and other authoritative
-sources.
+Look at our [IDEA.md / SEED.md / README.md]. Write a short, plain-English
+research brief that a non-technical user can paste into a deep-research
+agent (ChatGPT, Claude, Gemini). The brief should instruct the agent to
+identify all useful prior art — especially arxiv.org papers, git repos,
+product documentation, and other authoritative sources. Output ONLY the
+brief itself, ready to copy-paste. No preamble.
 ```
 
 ### 2. Download Manifest
 
-Walk through the streaming research outputs and produce one normalized list of URLs. The yaml is the source of truth and is safe to re-run as more research arrives.
+Once one or more deep-research outputs are in `docs/research/`, run:
 
 ```
 Look through docs/research. I want to produce a list of unique URLs and repos
@@ -71,9 +96,9 @@ etc have already been downloaded. The format should be suitable for idempotent
 upsert as new URLs are discovered.
 ```
 
-### 3. Parallel Download
+`downloads.yaml` is the source of truth — re-runnable as new tools' results arrive.
 
-Fan out sub-agents to fetch every entry into `inspiration/`, updating yaml status per item. Tunable concurrency to balance throughput against rate limits.
+### 3. Parallel Download
 
 ```
 Use sub-agents to download all materials identified in download.yaml into the
@@ -90,8 +115,6 @@ Invariants:
 
 ### 4. Semantic Index
 
-MapReduce over the corpus: one sub-agent per source produces local notes; a reducer merges into `docs/research/index/`. The index is what every future agent in the project will read first.
-
 ```
 Construct a semantic index of our research materials. The inspiration/
 directory contains all known prior art for our project; however, the token
@@ -102,6 +125,8 @@ dense and useful aspects of our prior art materials. Be sure to use
 sub-agents for each project - think MapReduce.
 ```
 
+MapReduce style: one sub-agent per source produces local notes; a reducer merges into `docs/research/index/`.
+
 ## Resulting Layout
 
 ```
@@ -109,9 +134,9 @@ project/
 ├── IDEA.md | SEED.md | README.md
 ├── docs/
 │   └── research/
-│       ├── <chatgpt-deep-research>.md
-│       ├── <gemini-deep-research>.md
-│       ├── <claude-deep-research>.md
+│       ├── chatgpt.md              # deep-research export, pasted by human
+│       ├── claude.md               # deep-research export, pasted by human
+│       ├── gemini.md               # deep-research export, pasted by human
 │       ├── downloads.yaml          # idempotent manifest, source of truth
 │       └── index/                  # semantic index (topics, tags, clusters, xrefs)
 ├── inspiration/                    # gitignored token cache
@@ -140,9 +165,11 @@ Surface these when the user is designing the harness around the corpus, not when
 
 ## Common Mistakes
 
+- **Skipping the user question** — never assume the seed. Always ask first; the brief is only as good as the seed.
+- **Writing a jargon-heavy brief** — it gets pasted into a fresh browser tab. Keep it plain English, under ~10 lines, no local paths.
+- **Trying to drive deep research from inside Claude Code** — you can't. Stage 1 hands off to a human who pastes into three web UIs.
+- **Stopping at one deep-research tool** — fan out to all three. Coverage differs; the union is the corpus.
 - **Committing `inspiration/`** — it's a cache, not source. Always gitignore. Reconstitutable from `downloads.yaml`.
 - **Skipping the manifest** — downloading inline from research outputs loses idempotency when new research arrives.
 - **One agent over the whole corpus** for the index — token-bloated and slow. Always MapReduce: one sub-agent per source, one reducer at the end.
-- **Stopping at one deep-research tool** — fan out to ChatGPT + Gemini + Claude. Coverage differs; the union is the corpus.
-- **Re-snapshotting research mid-flight** — once `downloads.yaml` exists, upsert into it. Don't regenerate from scratch.
 - **Treating the index as final** — it's a living artifact. Re-run stage 4 as new sources land in `inspiration/`.
