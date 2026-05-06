@@ -3,6 +3,10 @@
 // Pattern: <Canvas dpr={[1,2]}> + forwardRef'd <mesh> with <shaderMaterial>;
 // uniforms memoized; uTime mutated in useFrame.
 //
+// This is the R3F-shader-plane pattern (full-screen procedural background rendered
+// inside R3F). For real 3D scenes with meshes / lights / GLTF / physics / post,
+// see templates/skeleton-r3f-scene.tsx and references/threejs.md.
+//
 // Drop into:  src/ts-tailwind/<Category>/<Name>/<Name>.tsx
 // Note: Silk currently uses frameloop="always". For static-when-idle scenes, prefer
 // frameloop="demand" + invalidate() — see references/performance.md.

@@ -23,8 +23,8 @@ Notes: Motion is imported as `motion/react` (the React entry point). GSAP plugin
 | `@react-three/postprocessing` | ^3.0.4 | EffectComposer / Bloom / DOF in JSX | `src/ts-tailwind/Backgrounds/DarkVeil/DarkVeil.tsx`, `…/PixelBlast/PixelBlast.tsx` |
 | `@react-three/rapier` | ^2.1.0 | Rust-WASM 3D physics | `src/ts-tailwind/Components/Lanyard/Lanyard.tsx` |
 | `postprocessing` | ^6.36.0 | Underlying engine for `@react-three/postprocessing` | (transitive) |
-| `meshline` | ^3.3.1 | Thick-line rendering for Three.js | Ribbons, lanyard cable |
-| `maath` | ^0.10.8 | pmndrs math helpers (random distributions for particle init) | optional in particle components |
+| `meshline` | ^3.3.1 | Thick-line rendering for Three.js (`<line>` is hardware-1px on most GPUs) | `src/ts-tailwind/Components/Lanyard/Lanyard.tsx` (lanyard cord) |
+| `maath` | ^0.10.8 | pmndrs math helpers (random distributions for particle init; `easing.damp3` smooth following) | `src/ts-tailwind/Components/FluidGlass/FluidGlass.tsx` (`easing.damp3`) |
 | `ogl` | ^1.0.11 | Minimal WebGL (~8kb gzip), Three-like API. Used for nearly every shader background | `src/ts-tailwind/Backgrounds/Aurora/Aurora.tsx`, `…/Iridescence/Iridescence.tsx`, `…/LiquidChrome/LiquidChrome.tsx`, `…/LiquidEther/LiquidEther.tsx`, `…/Particles/Particles.tsx`, `…/Plasma/Plasma.tsx`, `…/PlasmaWave/PlasmaWave.tsx`, `…/Threads/Threads.tsx` |
 | `gl-matrix` | ^3.4.3 | Vector/matrix math for shader uniforms | OGL components needing matrix transforms |
 

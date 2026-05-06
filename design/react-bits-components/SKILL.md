@@ -34,8 +34,8 @@ Author philosophy: "I tried to add as many props and sliders and all kinds of tw
 | AnimatePresence wait-mode rotation | **Motion** (`AnimatePresence`) | `src/ts-tailwind/TextAnimations/RotatingText/RotatingText.tsx` | same |
 | Scroll-pinned, scrub, complex timeline | **GSAP + ScrollTrigger** via `@gsap/react`'s `useGSAP` | `src/ts-tailwind/TextAnimations/SplitText/SplitText.tsx`, `src/ts-tailwind/Animations/AnimatedContent/AnimatedContent.tsx` | ~30kb gsap + plugins |
 | Full-screen procedural shader background | **OGL** (`Renderer + Program + Mesh + Triangle`) | `src/ts-tailwind/Backgrounds/Aurora/Aurora.tsx` | ~8kb gzip |
-| Shader plane *inside* a 3D scene | **R3F** (`<Canvas>` + `<shaderMaterial>`) | `src/ts-tailwind/Backgrounds/Silk/Silk.tsx` | ~150kb three + r3f |
-| 3D scene graph with meshes / lights / GLTF | **R3F + drei** | `src/ts-tailwind/Components/ModelViewer/ModelViewer.tsx` | ~150kb + drei |
+| R3F shader-plane (full-screen procedural background rendered inside `<Canvas>`) | **R3F** (`<Canvas>` + `<shaderMaterial>` on a viewport-sized plane) | `src/ts-tailwind/Backgrounds/Silk/Silk.tsx` | ~150kb three + r3f |
+| R3F 3D scene (meshes / GLTF / lights / drei helpers; optional physics / post) | **R3F + drei** (+ optional `@react-three/rapier`, `@react-three/postprocessing`, `meshline`) | `src/ts-tailwind/Components/ModelViewer/ModelViewer.tsx`, `…/Lanyard/Lanyard.tsx`, `…/FluidGlass/FluidGlass.tsx`, `src/ts-tailwind/Backgrounds/Hyperspeed/Hyperspeed.tsx` | ~150kb + drei |
 | Custom render loop, instancing, scene class hierarchy | **Raw Three.js** | `src/ts-tailwind/Backgrounds/Ballpit/Ballpit.tsx`, `…/Hyperspeed/Hyperspeed.tsx` | ~150kb |
 | 3D physics | **R3F + @react-three/rapier** | `src/ts-tailwind/Components/Lanyard/Lanyard.tsx` | rapier-wasm ~1MB |
 | 2D physics | **matter-js** | `src/ts-tailwind/TextAnimations/FallingText/FallingText.tsx` | ~90kb |
@@ -146,13 +146,17 @@ See references/performance.md for full checklists.
 | Forgetting `gl.loseContext()` on OGL unmount | Browsers cap WebGL contexts (~16). Mount/unmount-without-cleanup eventually breaks rendering silently. Aurora's pattern is canonical: `gl.getExtension('WEBGL_lose_context')?.loseContext();` in the useEffect cleanup. |
 | Hand-writing the four variants from scratch | Always run `npm run new:component <Category> <ComponentName>` first — the scaffolder writes 8 files in 6 directories. |
 | Shared util for hex→RGB | Doesn't exist in the codebase. Each shader component reimplements `hexToRgb` / `hexToNormalizedRGB` inline. Match the surrounding component's style; don't add a shared util in a single PR. |
+| Treating shader-plane and 3D scene as the same primitive | Shader-plane (Silk) is a fragment shader rendered on a single viewport-sized mesh. 3D scene (ModelViewer / Lanyard / FluidGlass) is a real graph with GLTF, lights, cameras, and interaction. Pick the right template and reference — see `references/threejs.md`. |
+| Loading GLTF in render path without `useGLTF.preload(url)` | Causes Suspense-fallback flash on first paint. ModelViewer's pattern (`ModelViewer.tsx:407`) is `useEffect(() => { useGLTF.preload(url); }, [url])`. Pair with `MANUAL_ASSETS` in `jsrepo.config.ts` so jsrepo ships the binary. |
+| Using `<line>` for visible cords / beams / ribbons | Hardware-1px on most platforms regardless of `linewidth`. Use `meshline` (`extend({ MeshLineGeometry, MeshLineMaterial })`, then `<meshLineGeometry />` + `<meshLineMaterial lineWidth={…} resolution={…} />`) — Lanyard pattern. |
 
 ## Templates index
 
 | Template | Models on |
 | --- | --- |
 | [templates/skeleton-motion-2d.tsx](templates/skeleton-motion-2d.tsx) | `src/ts-tailwind/TextAnimations/BlurText/BlurText.tsx` (Motion + IntersectionObserver) |
-| [templates/skeleton-r3f-3d.tsx](templates/skeleton-r3f-3d.tsx) | `src/ts-tailwind/Backgrounds/Silk/Silk.tsx` (R3F `<Canvas>` + `<shaderMaterial>`) |
+| [templates/skeleton-r3f-shader-plane.tsx](templates/skeleton-r3f-shader-plane.tsx) | `src/ts-tailwind/Backgrounds/Silk/Silk.tsx` (R3F `<Canvas>` + `<shaderMaterial>` on a viewport-sized plane — *not* a 3D scene) |
+| [templates/skeleton-r3f-scene.tsx](templates/skeleton-r3f-scene.tsx) | `src/ts-tailwind/Components/ModelViewer/ModelViewer.tsx` + `…/Lanyard/Lanyard.tsx` (real 3D scene: GLTF, drei, lights, `frameloop="demand"`) |
 | [templates/skeleton-ogl-shader.tsx](templates/skeleton-ogl-shader.tsx) | `src/ts-tailwind/Backgrounds/Aurora/Aurora.tsx` (OGL Renderer/Program/Triangle) |
 | [templates/skeleton-gsap-scroll.tsx](templates/skeleton-gsap-scroll.tsx) | `src/ts-tailwind/Animations/AnimatedContent/AnimatedContent.tsx` + SplitText pattern |
 | [templates/skeleton-demo.tsx](templates/skeleton-demo.tsx) | `src/demo/Backgrounds/AuroraDemo.jsx` (PreviewTab + Customize sliders + PropTable) |
@@ -167,3 +171,4 @@ See references/performance.md for full checklists.
 | [references/performance.md](references/performance.md) | R3F + Motion + GSAP + a11y checklists, the abandon-when-slow rule, reduced-motion gating |
 | [references/four-variants.md](references/four-variants.md) | Mapping table; `npm run new:component`; AI-assisted TS↔JS / Tailwind↔CSS workflow with manual-review caveats; `jsrepo` registry mechanics |
 | [references/shaders.md](references/shaders.md) | OGL boilerplate; GLSL idioms (smoothstep, FBM, noise, polar coords, color stops); thebookofshaders.com / iquilezles.org pointers; DPR clamping and pause-when-offscreen |
+| [references/threejs.md](references/threejs.md) | R3F vs OGL vs vanilla decision matrix; canonical R3F scene shape; `useGLTF` + `MANUAL_ASSETS`; drei helpers in use; Rapier physics; meshline; postprocessing pipeline; instancing; camera + lighting cookbook; common 3D scene mistakes |

@@ -1,5 +1,7 @@
 # Shaders — OGL Boilerplate and GLSL Idioms
 
+For 3D scenes with meshes / lights / GLTF / physics / postprocessing see `references/threejs.md`. This file covers full-screen fragment-shader backgrounds (OGL or R3F-shader-plane).
+
 The OGL path is the canonical React Bits shader pattern (Aurora, Iridescence, Liquid Chrome, Plasma, Threads, Particles, …). OGL is ~8kb gzipped vs Three.js ~150kb — the right choice for a single full-screen fragment shader.
 
 ## OGL setup boilerplate
