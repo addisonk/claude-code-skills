@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>[Playground title]</title>
+  <style>
+    /* Inline the full contents of ../styles/theme.css here. */
+
+    /* Playground-only additions. */
+    .preview-pane {
+      min-height: 240px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 24px;
+      margin: 14px 0;
+      display: grid;
+      place-items: center;
+    }
+  </style>
+</head>
+<body>
+  <header class="doc-header">
+    <p class="eyebrow">Playground</p>
+    <h1>[Playground title]</h1>
+    <p class="summary">[What this playground lets you tune, and how to export the result back to Claude.]</p>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Sections">
+      <a href="#preview">Preview</a>
+      <a href="#controls">Controls</a>
+      <a href="#export">Export</a>
+    </nav>
+
+    <main>
+      <section id="preview">
+        <h2>Preview</h2>
+        <div class="preview-pane" id="preview-pane">
+          <!-- The live preview lives here. Update it inside the script below. -->
+          <div id="preview-target">Hello</div>
+        </div>
+      </section>
+
+      <section id="controls">
+        <h2>Controls</h2>
+        <div class="controls">
+          <label>
+            Duration (ms)
+            <input type="range" id="ctl-duration" min="50" max="2000" step="10" value="300">
+            <span id="val-duration">300</span>
+          </label>
+          <label>
+            Easing
+            <select id="ctl-easing">
+              <option>ease</option>
+              <option>ease-in</option>
+              <option>ease-out</option>
+              <option>ease-in-out</option>
+              <option>linear</option>
+            </select>
+          </label>
+          <label>
+            End color
+            <input type="color" id="ctl-color" value="#8b5cf6">
+          </label>
+          <label>
+            Label
+            <input type="text" id="ctl-label" value="Hello">
+          </label>
+        </div>
+      </section>
+
+      <section id="export">
+        <h2>Export</h2>
+        <p>Click to copy the current state to your clipboard, then paste into Claude.</p>
+        <p>
+          <button class="btn btn-primary" type="button" id="copy-json">Copy as JSON</button>
+          <button class="btn" type="button" id="copy-prompt">Copy as prompt</button>
+        </p>
+        <details>
+          <summary>Live state</summary>
+          <pre><code id="state-preview">{}</code></pre>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <footer class="doc-footer">
+    <p>Throwaway editor. Single file, no dependencies. Refresh to reset state.</p>
+  </footer>
+
+  <script>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+
+      const state = {
+        duration: Number($("ctl-duration").value),
+        easing: $("ctl-easing").value,
+        color: $("ctl-color").value,
+        label: $("ctl-label").value,
+      };
+
+      function render() {
+        $("val-duration").textContent = String(state.duration);
+        const target = $("preview-target");
+        target.textContent = state.label;
+        target.style.transition = "color " + state.duration + "ms " + state.easing;
+        target.style.color = state.color;
+        $("state-preview").textContent = JSON.stringify(state, null, 2);
+      }
+
+      function bind(id, key, parse = (v) => v) {
+        const el = $(id);
+        el.addEventListener("input", () => {
+          state[key] = parse(el.value);
+          render();
+        });
+      }
+
+      bind("ctl-duration", "duration", Number);
+      bind("ctl-easing", "easing");
+      bind("ctl-color", "color");
+      bind("ctl-label", "label");
+
+      $("copy-json").addEventListener("click", async () => {
+        await navigator.clipboard.writeText(JSON.stringify(state, null, 2));
+        $("copy-json").textContent = "Copied!";
+        setTimeout(() => ($("copy-json").textContent = "Copy as JSON"), 1500);
+      });
+
+      $("copy-prompt").addEventListener("click", async () => {
+        const prompt =
+          "Apply these settings to the checkout button:\n" +
+          "- duration: " + state.duration + "ms\n" +
+          "- easing: " + state.easing + "\n" +
+          "- end color: " + state.color + "\n" +
+          "- label: " + state.label;
+        await navigator.clipboard.writeText(prompt);
+        $("copy-prompt").textContent = "Copied!";
+        setTimeout(() => ($("copy-prompt").textContent = "Copy as prompt"), 1500);
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

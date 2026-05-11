@@ -12,6 +12,7 @@ Open-source skills for [Claude Code](https://claude.ai/code).
 | [steve-jobs-product-design](design/steve-jobs-product-design) | Product design auditor based on Steve Jobs' principles |
 | [lucide-icon-svg-references](design/lucide-icon-svg-references) | SVG icon design auditor and generator based on Lucide's design system |
 | [react-bits-components](design/react-bits-components) | Author animated React components in the React Bits style — Motion / GSAP / OGL shaders / R3F / matter-js across the four-variant registry |
+| [html-artifact](design/html-artifact) | Produce single-file, self-contained HTML artifacts (specs, plans, reports, code-review explainers, design explorations, interactive playgrounds) instead of markdown |
 
 ### Mobile
 

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>[Title]</title>
+  <style>
+    /*
+     * Inline the full contents of ../styles/theme.css here.
+     * Do not reference it externally — the artifact must be self-contained.
+     */
+  </style>
+</head>
+<body>
+  <header class="doc-header">
+    <p class="eyebrow">[kicker, e.g. "Plan", "Spec", "PR explainer"]</p>
+    <h1>[Title]</h1>
+    <p class="summary">[One-paragraph summary in plain prose.]</p>
+    <div class="pill-row" aria-label="Frontmatter">
+      <span class="pill pill-status-active">status: active</span>
+      <span class="pill pill-type-feat">type: feat</span>
+      <span class="pill pill-date">date: YYYY-MM-DD</span>
+      <span class="pill pill-origin">origin: [optional source path]</span>
+    </div>
+    <script type="application/json" id="artifact-frontmatter">
+      {
+        "title": "[Title]",
+        "type": "feat",
+        "status": "active",
+        "date": "YYYY-MM-DD",
+        "origin": "[optional source path]"
+      }
+    </script>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <a href="#summary">Summary</a>
+      <a href="#problem-frame">Problem Frame</a>
+      <a href="#requirements">Requirements</a>
+      <a href="#key-technical-decisions">Key Technical Decisions</a>
+      <a href="#implementation-units">Implementation Units</a>
+      <a href="#u1">U1. [Name]</a>
+      <a href="#u2">U2. [Name]</a>
+      <a href="#test-scenarios">Test Scenarios</a>
+      <a href="#risks-open-questions">Risks &amp; Open Questions</a>
+      <a href="#sources">Sources</a>
+    </nav>
+
+    <main>
+      <!--
+        Optional Implementation Note. Use whenever the HTML is a view of a
+        markdown source that another agent/skill consumes.
+      -->
+      <aside class="notice">
+        <strong>Implementation note:</strong> This is the HTML view of <code>[source-path.md]</code>. Downstream agents consume the markdown source.
+      </aside>
+
+      <section id="summary">
+        <h2>Summary</h2>
+        <p>[1-3 paragraphs that explain what this is and why it matters.]</p>
+      </section>
+
+      <section id="problem-frame">
+        <h2>Problem Frame</h2>
+        <p>[What problem is being solved, for whom, and what changes when we ship.]</p>
+      </section>
+
+      <section id="requirements">
+        <h2>Requirements</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Requirement</th><th>Source</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="ID">R1</td>
+                <td data-label="Requirement">[Requirement text.]</td>
+                <td data-label="Source">[Brainstorm / discussion / ticket.]</td>
+                <td data-label="Status"><span class="status-ok">Met</span></td>
+              </tr>
+              <tr>
+                <td data-label="ID">R2</td>
+                <td data-label="Requirement">[Requirement text.]</td>
+                <td data-label="Source">[Source.]</td>
+                <td data-label="Status">Pending</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="key-technical-decisions">
+        <h2>Key Technical Decisions</h2>
+        <ul>
+          <li><strong>[Decision]:</strong> [Chosen option, with one-line rationale.]</li>
+          <li><strong>[Decision]:</strong> [Chosen option, with one-line rationale.]</li>
+        </ul>
+      </section>
+
+      <section id="implementation-units">
+        <h2>Implementation Units</h2>
+        <p>[Optional one-paragraph overview of the work breakdown.]</p>
+
+        <!--
+          Optional dependency diagram. Swap with sequence or data-flow patterns
+          from ../references/svg-patterns.md when more appropriate.
+        -->
+        <svg class="diagram" viewBox="0 0 640 220" role="img" aria-labelledby="dependency-title" xmlns="http://www.w3.org/2000/svg">
+          <title id="dependency-title">Dependency graph between implementation units</title>
+          <defs>
+            <marker id="dep-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <rect x="40" y="76" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="100" y="110" text-anchor="middle">U1</text>
+          <rect x="260" y="32" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="320" y="66" text-anchor="middle">U2</text>
+          <rect x="260" y="132" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="320" y="166" text-anchor="middle">U3</text>
+          <rect x="480" y="76" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="540" y="110" text-anchor="middle">U4</text>
+          <line x1="164" y1="94" x2="254" y2="66" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
+          <line x1="164" y1="114" x2="254" y2="154" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
+          <line x1="384" y1="60" x2="474" y2="94" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
+          <line x1="384" y1="160" x2="474" y2="116" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
+        </svg>
+
+        <article id="u1">
+          <h3>U1. [Unit name]</h3>
+          <p>[Purpose: one or two sentences.]</p>
+          <h4>Scope</h4>
+          <ul>
+            <li>[Bullet.]</li>
+            <li>[Bullet.]</li>
+          </ul>
+          <h4>Test scenarios</h4>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Scenario</th><th>Expected</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td data-label="Scenario">[Action / input.]</td>
+                  <td data-label="Expected">[Expected outcome.]</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article id="u2">
+          <h3>U2. [Unit name]</h3>
+          <p>[Purpose.]</p>
+        </article>
+      </section>
+
+      <section id="test-scenarios">
+        <h2>Test Scenarios</h2>
+        <p>[Cross-unit scenarios that don't belong inside a single article.]</p>
+      </section>
+
+      <section id="risks-open-questions">
+        <h2>Risks &amp; Open Questions</h2>
+        <div class="risk risk-high">
+          <strong>High risk:</strong> [Risk and its mitigation, if any.]
+        </div>
+        <div class="risk risk-medium">
+          <strong>Medium risk:</strong> [Risk.]
+        </div>
+        <ul>
+          <li>[Open question.]</li>
+        </ul>
+      </section>
+
+      <section id="sources">
+        <h2>Sources &amp; References</h2>
+        <ul>
+          <li><a href="[url-or-path]">[Title]</a> — [why it matters]</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <footer class="doc-footer">
+    <p>Generated by html-artifact. Source: <code>[origin path, if any]</code>.</p>
+  </footer>
+</body>
+</html>
