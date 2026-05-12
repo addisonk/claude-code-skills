@@ -79,6 +79,8 @@ Use the matching template from `templates/`. Each template:
 
 If the project already has a `design-system.html`, prefer its tokens over the default theme — read it and replace `:root` variables. See the `design-system-to-html` skill.
 
+After reading project styling sources such as `globals.css`, `DESIGN.md`, design tokens, or `design-system.html`, also read `references/document-readability.md`. Treat project styling as brand input; use the readability reference to adapt typography, spacing, and section layout for long-form documents.
+
 ### 4. Add diagrams when they help
 
 Use inline SVG, never images. Three canonical patterns are in `references/svg-patterns.md`:
@@ -144,6 +146,7 @@ This makes HTML artifacts a strict superset of markdown frontmatter, not a repla
 
 - `SKILL.md` — this file
 - `references/use-cases.md` — five canonical use cases with example prompts and structural hints
+- `references/document-readability.md` — advisory rules for adapting brand styling into readable long-form artifacts
 - `references/skeleton.md` — the canonical document skeleton, frontmatter contract, and anchor ID conventions
 - `references/svg-patterns.md` — data-flow, sequence, and dependency-graph inline SVG patterns
 - `styles/theme.css` — embedded CSS theme (light/dark, mobile-responsive) — copied into every artifact's `<style>` block
