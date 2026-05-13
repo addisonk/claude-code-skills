@@ -47,12 +47,14 @@
   header.page { margin-bottom: 40px; }
   header.page h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
   header.page p { margin: 0; color: var(--muted); max-width: 80ch; }
-  /* Optional product logo. Forced to a clean white silhouette on the dark theme via
-     brightness(0) invert(1) — works for any mono or multi-color logo; the project's
-     userflows.html can override this filter per-deployment if color preservation matters. */
-  .page-logo { margin: 0 0 20px; filter: brightness(0) invert(1); opacity: 0.92; }
+  /* Optional product logo, prepended above the sidebar nav. Forced to a clean white
+     silhouette on the dark theme via brightness(0) invert(1) — works for any mono or
+     multi-color logo; the project's userflows.html can override this filter per-
+     deployment if color preservation matters. */
+  .page-logo { margin: 0 10px 24px; filter: brightness(0) invert(1); opacity: 0.92;
+    line-height: 0; }
   .page-logo svg, .page-logo img, img.page-logo {
-    display: block; height: 32px; width: auto; max-width: 280px; }
+    display: block; height: 32px; width: auto; max-width: 180px; }
 
   /* Userflow section */
   section.flow { margin-top: 56px; scroll-margin-top: 20px; }
@@ -138,14 +140,11 @@
     return;
   }
 
-  // Header
-  $("title").textContent = data.project?.name ? `${data.project.name} — Userflows` : "Userflows";
-  $("subtitle").textContent = data.project?.description ?? "";
-
   // Optional product logo. Accepts inline SVG markup (string starting with "<svg"),
-  // a data URL, or a relative path. Prepended above the title.
+  // a data URL, or a relative path. Prepended above the sidebar nav.
   const logo = data.project?.logo;
-  if (logo && typeof logo === "string") {
+  const hasLogo = logo && typeof logo === "string";
+  if (hasLogo) {
     const trimmed = logo.trim();
     const isInlineSvg = trimmed.startsWith("<svg");
     let logoEl;
@@ -159,8 +158,16 @@
       logoEl.src = trimmed;
       logoEl.alt = data.project?.name ? `${data.project.name} logo` : "Project logo";
     }
-    document.querySelector("header.page")?.prepend(logoEl);
+    document.querySelector("aside.toc")?.prepend(logoEl);
   }
+
+  // Header. When a logo is present, the project name lives in the logo —
+  // don't repeat it in the H1. Without a logo, fall back to "{name} — Userflows"
+  // so the page still identifies the product.
+  $("title").textContent = hasLogo
+    ? "Userflows"
+    : (data.project?.name ? `${data.project.name} — Userflows` : "Userflows");
+  $("subtitle").textContent = data.project?.description ?? "";
 
   // Lookup tables
   const nodeById = new Map((data.nodes || []).map((n) => [n.id, n]));
