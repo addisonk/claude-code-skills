@@ -37,7 +37,7 @@ Inspired by Thariq Shihipar's [The Unreasonable Effectiveness of HTML](https://t
 If the user just said "make an HTML file for X", you can move fast:
 
 1. Read `templates/spec-or-plan.html`, `templates/report.html`, `templates/code-review.html`, or `templates/playground.html` — whichever fits the use case (see `references/use-cases.md` for picking the right one).
-2. Fill in the content. Keep the embedded `<style>` block from the template — it pulls from `styles/theme.css` and gives you light/dark mode + mobile responsive out of the box.
+2. Fill in the content. Keep the embedded `<style>` block from the template — it pulls from `styles/globals.css` and gives you light/dark mode + mobile responsive out of the box.
 3. Write to disk at the path agreed with the user (default: `<cwd>/<descriptive-name>.html`).
 4. Print the absolute path so the user can ⌘-click to open, and offer to run `scripts/open-in-browser.sh <path>`.
 
@@ -71,7 +71,7 @@ Confirm with the user before writing if the path isn't obvious.
 
 Use the matching template from `templates/`. Each template:
 
-- Inlines the entire CSS theme from `styles/theme.css` in a single `<style>` block
+- Inlines the entire CSS theme from `styles/globals.css` in a single `<style>` block
 - Provides a header (eyebrow + h1 + summary + frontmatter pills + JSON script tag)
 - Provides an anchored TOC and `<main>` container
 - Includes the dark-mode + mobile-responsive media queries
@@ -140,7 +140,7 @@ This makes HTML artifacts a strict superset of markdown frontmatter, not a repla
 ## Quality Bar
 
 - **Self-contained** — no `<link rel="stylesheet">`, no `<script src="...">`, no `<img src="https://...">`, no `@import url(...)`, no web fonts. Open offline to verify.
-- **Embedded theme** — single `<style>` block at the top, the full theme from `styles/theme.css`. No CSS files referenced externally.
+- **Embedded theme** — single `<style>` block at the top, the full theme from `styles/globals.css`. No CSS files referenced externally.
 - **Semantic HTML** — real `<table>` for tabular data, real `<section>` / `<article>` for grouping, real `<h2>` / `<h3>` for headings. No `<div>` soup.
 - **ASCII IDs only** — anchors like `#summary`, `#requirements`, `#u1`. No emoji or non-ASCII in IDs.
 - **Mobile-responsive** — readable at 400px viewport. Tables collapse to stacked label-prefixed rows.
@@ -166,7 +166,7 @@ This makes HTML artifacts a strict superset of markdown frontmatter, not a repla
 - `references/document-readability.md` — advisory rules for adapting brand styling into readable long-form artifacts
 - `references/skeleton.md` — the canonical document skeleton, frontmatter contract, and anchor ID conventions
 - `references/svg-patterns.md` — data-flow, sequence, and dependency-graph inline SVG patterns
-- `styles/theme.css` — embedded CSS theme (light/dark, mobile-responsive) — copied into every artifact's `<style>` block
+- `styles/globals.css` — embedded CSS theme (light/dark, mobile-responsive) — copied into every artifact's `<style>` block
 - `templates/spec-or-plan.html` — spec / plan / brainstorm starting template
 - `templates/report.html` — report / research / explainer template with key-takeaways callout
 - `templates/code-review.html` — PR explainer with line-numbered diff and severity-colored margin annotations

@@ -12,7 +12,7 @@ The canonical structure every HTML artifact extends. Templates in `templates/` a
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{title}}</title>
   <style>
-    /* Paste the entire contents of styles/theme.css here. */
+    /* Paste the entire contents of styles/globals.css here. */
   </style>
 </head>
 <body>
