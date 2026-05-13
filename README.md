@@ -36,6 +36,7 @@ Open-source skills for [Claude Code](https://claude.ai/code).
 |-------|-------------|
 | [browser-test-review](dev-tools/browser-test-review) | Review completed features by testing them in the browser |
 | [file-suggestion](dev-tools/file-suggestion) | File search using rg + fzf |
+| [flowcap](dev-tools/flowcap) | Document an app's architecture and main flows as a single-page HTML map + a sibling `userflows.json` that future LLM agents load before touching feature/bugfix work |
 | [v0-spec-pack-extractor](dev-tools/v0-spec-pack-extractor) | Extract spec packs from any codebase (routes, components, data models) |
 | [presentational-components](dev-tools/presentational-components) | Enforce presentational UI component patterns with domain-focused hooks |
 

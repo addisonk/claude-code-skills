@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "flowcap userflows.json",
+  "type": "object",
+  "required": ["project", "lanes", "nodes", "flows"],
+  "properties": {
+    "project": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "autoSelectFirst": { "type": "boolean" }
+      }
+    },
+    "lanes": {
+      "type": "array",
+      "description": "Columns of the swimlane diagram, left to right. Order matters — flows usually read left-to-right.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "label": { "type": "string", "description": "Uppercase short label, e.g. 'CLIENT SURFACES'" },
+          "color": { "type": "string", "description": "Legend swatch color (CSS hex). Optional." }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "description": "Boxes inside the diagram. Each node sits inside one lane.",
+      "items": {
+        "type": "object",
+        "required": ["id", "lane", "title"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "lane": { "type": "string", "description": "Lane id this node belongs to." },
+          "title": { "type": "string", "description": "Short identifier — package name, service name, table name. Shown monospace." },
+          "subtitle": { "type": "string", "description": "One-line clarification. Shown below title in dim text." }
+        }
+      }
+    },
+    "flows": {
+      "type": "array",
+      "description": "Named flows. Selecting one in the UI highlights its nodes and draws numbered edges.",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "steps"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "title": { "type": "string", "description": "Imperative or short noun phrase. Used in the flow picker." },
+          "description": { "type": "string", "description": "One-line explanation shown under the title." },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["from", "to"],
+              "properties": {
+                "from": { "type": "string", "description": "Node id." },
+                "to": { "type": "string", "description": "Node id." },
+                "label": { "type": "string", "description": "Verb/action on the edge, e.g. 'invoke CLI', 'getIdToken()'." },
+                "description": { "type": "string", "description": "1–3 sentences. What gets passed, why, where in the code." }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
