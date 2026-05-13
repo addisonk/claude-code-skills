@@ -87,13 +87,28 @@ The output is **two files in `docs/`**: the viewer (`userflows.html`) and the da
    - `from` / `to` — node ids (the user moves from one surface to another, or stays put and triggers something)
    - `label` — the action in plain language: *"Tap **Get started**"*, *"Enter email and password"*, *"Confirm payment"*
    - `description` — one sentence in the user's voice or third-person POV, describing what they see/do. **Optionally append a code pointer after `—` for LLM debugging context.** Example: *"User taps **Save** in the editor — `app/editor/page.tsx`, calls `useSaveEntry()`."*
-5. **Write the two files.** Place both at the project's docs root:
+5. **Find or ask for the product logo (optional but recommended).** A logo in the header makes the doc feel like the product's, not a generic template. The viewer renders it as a white silhouette above the title via `filter: brightness(0) invert(1)`, so any mono or multi-color logo works.
+   - **Auto-detect** common spots:
+     ```bash
+     find . -maxdepth 4 \( -name "logo.svg" -o -name "logo.png" -o -name "logo.jpg" \
+       -o -name "logo-light.svg" -o -name "logo-dark.svg" -o -name "icon.svg" \) \
+       -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/dist/*" \
+       -not -path "*/build/*" -not -path "*/.next/*" 2>/dev/null | head
+     ```
+     Look in `public/`, `assets/`, `src/assets/`, `app/`, `brand/`, `branding/`, `static/`.
+   - **Found one or more?** Use **AskUserQuestion** to confirm. Question: *"Use `<path>` as the userflows header logo?"* Options: **Yes**, **Pick a different path**, **Skip (text-only title)**.
+   - **Found nothing?** Use **AskUserQuestion**: *"No product logo found in the usual spots. Provide a path, or skip?"* Options: **Provide path**, **Skip**.
+   - **Embed it into `project.logo`** (single-file artifact, no external refs):
+     - **SVG:** read the file and paste the raw SVG markup as the string value of `project.logo`. Inline SVG keeps the artifact crisp at any zoom.
+     - **PNG / JPG:** base64-encode and set `project.logo` to `"data:image/png;base64,…"` (or `image/jpeg`). The artifact stays self-contained.
+   - Skipping is fine — the text title reads cleanly on its own.
+6. **Write the two files.** Place both at the project's docs root:
    ```
    docs/userflows.html   ← copy of template.html, unmodified
    docs/userflows.js     ← project data, exactly this shape:
                             window.USERFLOWS = { /* validated against schema.json */ };
    ```
-6. **Preview.** Open the file directly — `open docs/userflows.html` on macOS, or double-click. It works on `file://`; no server needed. Click each userflow and verify the steps read like a real person moving through the app, not like a backend trace.
+7. **Preview.** Open the file directly — `open docs/userflows.html` on macOS, or double-click. It works on `file://`; no server needed. Click each userflow and verify the steps read like a real person moving through the app, not like a backend trace.
 
 Source files in this skill:
 - `template.html` — drop-in viewer. **Do not edit the viewer logic unless the user asks for a visual change.**
@@ -116,7 +131,7 @@ The object assigned to `window.USERFLOWS` (validated by `schema.json`):
 
 ```jsonc
 {
-  "project":  { "name": "...", "description": "..." },
+  "project":  { "name": "...", "description": "...", "logo": "<svg …>…</svg>" },
   "defaults": { "autoSelectFirst": true },
   "lanes":    [ { "id": "onboarding", "label": "Onboarding", "color": "#34d399" } ],
   "nodes":    [ { "id": "welcome", "lane": "onboarding", "title": "Welcome screen", "subtitle": "name + intro" } ],
@@ -159,6 +174,7 @@ The user-facing description comes first. The code pointer is a footnote.
 
 - **Mapping backend pipelines instead of user journeys.** A cron job that generates content overnight is not a userflow. A webhook chain is not a userflow. A userflow is what a *person* does, sees, taps, reads, or receives. If no user is on the other end of any step, delete the userflow.
 - **Inventing overly specific userflow names when a standard taxonomy entry fits.** "Sign up and finish onboarding then receive the first push notification" is a custom mouthful for what's just **Onboarding**. Check `references/userflow-types.md` first; the product-specific detail belongs in the userflow's `description` field, not the title.
+- **Pointing `project.logo` at an external URL or relative path that won't resolve.** The artifact is meant to open by double-click and survive AirDrop, Slack uploads, and email. Embed the logo inline as SVG markup or a base64 data URL. If you must use a relative path, only do so when the file will ship alongside `userflows.html` (and even then, prefer inlining).
 - **Lanes as tech locations.** "Server", "Functions", "Database", "External APIs" are wrong. Use product surfaces: "Marketing", "Sign-up", "Onboarding", "Main app", "Settings", "Email/Push".
 - **Nodes that aren't user-visible.** A Firestore collection, a queue, an internal function — none of these belong as nodes. Screens, modals, emails, push notifications, in-app banners, decision points the user encounters — those are nodes.
 - **Step descriptions written from the system's POV.** Rewrite "Convex emits an event" as "User taps Save; app confirms the entry was saved." If you can't rephrase a step in the user's voice, the step probably doesn't belong in this file.

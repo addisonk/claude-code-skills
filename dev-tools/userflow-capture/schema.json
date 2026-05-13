@@ -9,7 +9,8 @@
       "required": ["name"],
       "properties": {
         "name": { "type": "string" },
-        "description": { "type": "string" }
+        "description": { "type": "string" },
+        "logo": { "type": "string", "description": "Optional product logo. Inline SVG markup (string starting with '<svg'), a data URL (e.g. 'data:image/png;base64,…'), or a relative path. Rendered in the page header above the title. The viewer applies brightness(0) invert(1) so any logo appears as a white silhouette on the dark theme." }
       }
     },
     "defaults": {

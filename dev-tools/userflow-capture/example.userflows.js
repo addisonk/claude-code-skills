@@ -10,7 +10,8 @@
 window.USERFLOWS = {
   "project": {
     "name": "Quill",
-    "description": "A daily journaling app. Pick a journey on the right to walk through how a real user moves through Quill."
+    "description": "A daily journaling app. Pick a journey on the right to walk through how a real user moves through Quill.",
+    "logo": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z'/><path d='m16 8-14 14'/><path d='M17.5 15H9'/></svg>"
   },
   "defaults": { "autoSelectFirst": true },
   "lanes": [
