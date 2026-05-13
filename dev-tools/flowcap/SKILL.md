@@ -65,7 +65,7 @@ find . \( -name flowcap.html -o -name userflows.json \) -not -path '*/node_modul
 
 ## Producing — generate one `flowcap.html` for a project
 
-The output is **one file**. No build step, no helper scripts, no Python, no JSON sidecar. Copy the template, replace the embedded data block, write the file, done.
+The output is **one file**. No build step, no helper scripts, no sidecar files. Copy the template, replace the embedded data block, write the file, done.
 
 1. **Discover the system.** Read the repo: top-level dirs, package.json/Cargo.toml/etc., service boundaries, deploy config, external API calls. Don't guess — open files. If unsure, ask the user which user-facing flows matter (signup, build, checkout, etc.).
 2. **Pick 4–7 swimlanes.** Lanes are categories of *where work happens*, left-to-right by typical data direction. Good lane sets: `Actors → Client surfaces → Server/Functions → Storage → Pipeline → Distribution → External services`. Use what fits the project.
@@ -76,7 +76,7 @@ The output is **one file**. No build step, no helper scripts, no Python, no JSON
    docs/flowcap.html
    ```
    The HTML reads its data from that inline script tag — no fetch, no second file. The user can double-click it to open.
-6. **Preview.** Just open the file: `open docs/flowcap.html` (macOS) or double-click in the file browser. Click each flow, verify edges land on the right nodes and step text reads naturally. **Do not** spin up `python3 -m http.server` or any other local server — the file works on `file://`.
+6. **Preview.** Open the file directly — `open docs/flowcap.html` on macOS, or double-click in the file browser. It works on `file://`; no server needed. Click each flow, verify edges land on the right nodes and step text reads naturally.
 
 Source files in this skill:
 - `template.html` — drop-in viewer with an empty `<script id="userflows">` block to fill in. **Do not edit the viewer logic unless the user asks for a visual change.**
@@ -129,7 +129,7 @@ Skip flavor text. A developer should be able to grep the codebase from the descr
 - **Lanes used as types instead of locations.** "React components" is not a lane; "Client surfaces" is. Lanes answer *where*, not *what*.
 - **Nodes too coarse.** "Backend" is not a node. `functions/builds`, `functions/billing`, `functions/auth` are.
 - **Steps that span multiple actions.** One arrow = one call/event/write. Split compound steps.
-- **Writing helper scripts.** No Python generator, no Node script, no codegen. flowcap's entire output is one HTML file. If you're tempted to write a `generate_flows.py`, stop — just write the JSON inline.
+- **Writing helper scripts to generate the output.** flowcap's entire output is one HTML file. If you find yourself about to write a script that emits the flows, stop — write the JSON inline by hand.
 - **Splitting the data back into a sibling file.** The JSON lives inside the HTML in a `<script id="userflows">` block. Don't `fetch()` it, don't emit a separate `userflows.json` next to it.
 - **Editing `template.html` viewer logic to tweak per-project styling.** Don't. If you truly need a visual tweak, add a small `<style>` override at the bottom of the project's HTML — leave the script logic alone.
 - **Forgetting to update the embedded JSON when the code changes.** Stale > missing. Treat the data block like a schema migration: any PR that moves a flow updates it in the same change.
