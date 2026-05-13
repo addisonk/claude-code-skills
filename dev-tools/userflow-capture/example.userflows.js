@@ -1,55 +1,92 @@
-// Example userflows.js — drop this next to flowcap.html in your project.
-// See schema.json for the full data shape.
+// Example userflows.js — drop this next to userflows.html in your project.
+// This is a fictional journaling app called "Quill". Read it for shape AND voice:
+// every step is something a real user does, sees, taps, or receives — not a
+// backend trace. Code pointers (if any) are footnotes after an em dash.
 window.USERFLOWS = {
   "project": {
-    "name": "ToDesktop",
-    "description": "Every package and external service that powers ToDesktop Builder and ToDesktop for Electron. Pick a flow on the right to highlight the path through the system and see what gets passed at each step."
+    "name": "Quill",
+    "description": "A daily journaling app. Pick a journey on the right to walk through how a real user moves through Quill."
   },
   "defaults": { "autoSelectFirst": true },
   "lanes": [
-    { "id": "actors",   "label": "Actors",                    "color": "#ec4899" },
-    { "id": "client",   "label": "Client surfaces",           "color": "#3b82f6" },
-    { "id": "fns",      "label": "Auth + Firebase functions", "color": "#a855f7" },
-    { "id": "data",     "label": "Storage / data",            "color": "#f59e0b" },
-    { "id": "build",    "label": "Build pipeline",            "color": "#10b981" },
-    { "id": "dist",     "label": "Distribution",              "color": "#06b6d4" },
-    { "id": "external", "label": "External services",         "color": "#9ca3af" }
+    { "id": "marketing",  "label": "Marketing",    "color": "#94a3b8" },
+    { "id": "auth",       "label": "Sign-up",     "color": "#a78bfa" },
+    { "id": "onboarding", "label": "Onboarding",  "color": "#34d399" },
+    { "id": "app",        "label": "Daily app",   "color": "#fbbf24" },
+    { "id": "settings",   "label": "Settings",    "color": "#f87171" },
+    { "id": "messaging",  "label": "Push / Email","color": "#60a5fa" }
   ],
   "nodes": [
-    { "id": "user-electron-repo", "lane": "actors",   "title": "User Electron repo",   "subtitle": "@todesktop/runtime" },
-    { "id": "td-cli",             "lane": "client",   "title": "@todesktop/cli",       "subtitle": "todesktop build / release" },
-    { "id": "fb-auth",            "lane": "fns",      "title": "Firebase Auth",        "subtitle": "Google / GitHub / pw / OIDC" },
-    { "id": "fns-builds",         "lane": "fns",      "title": "functions/builds",     "subtitle": "15 fns · prepare/kickOff/release" },
-    { "id": "firestore",          "lane": "data",     "title": "Firestore",            "subtitle": "users · apps · builds · invites" },
-    { "id": "azure-pipelines",    "lane": "build",    "title": "Azure Pipelines",      "subtitle": "DevOps API · Mac/Win/Linux" },
-    { "id": "cdn-workers",        "lane": "dist",     "title": "monorepo · cdn workers", "subtitle": "Cloudflare workers for downloads" },
-    { "id": "apple-notarize",     "lane": "external", "title": "Apple notarization",   "subtitle": "altool · stapler" }
+    { "id": "landing",       "lane": "marketing",  "title": "Landing page",         "subtitle": "quill.app/" },
+    { "id": "pricing",       "lane": "marketing",  "title": "Pricing page",         "subtitle": "free + paid plans" },
+    { "id": "signup",        "lane": "auth",       "title": "Sign-up screen",       "subtitle": "email + password" },
+    { "id": "verify",        "lane": "auth",       "title": "Verify email",         "subtitle": "6-digit code" },
+    { "id": "welcome",       "lane": "onboarding", "title": "Welcome screen",       "subtitle": "first name + intro" },
+    { "id": "pick-reminder", "lane": "onboarding", "title": "Reminder picker",      "subtitle": "default 8pm" },
+    { "id": "today",         "lane": "app",        "title": "Today tab",            "subtitle": "main home" },
+    { "id": "editor",        "lane": "app",        "title": "Entry editor",         "subtitle": "write today's entry" },
+    { "id": "history",       "lane": "app",        "title": "History tab",          "subtitle": "browse past entries" },
+    { "id": "account",       "lane": "settings",   "title": "Account screen",       "subtitle": "profile + plan" },
+    { "id": "reminder-pref", "lane": "settings",   "title": "Reminder preferences", "subtitle": "change time / days" },
+    { "id": "push-reminder", "lane": "messaging",  "title": "Daily reminder push",  "subtitle": "fires at user's set time" },
+    { "id": "welcome-email", "lane": "messaging",  "title": "Welcome email",        "subtitle": "sent right after signup" }
   ],
   "flows": [
     {
-      "id": "todesktop-build",
-      "title": "todesktop build (Electron CLI)",
-      "description": "Developer runs `todesktop build` in their Electron repo.",
+      "id": "sign-up",
+      "title": "Sign up and finish onboarding",
+      "description": "A new visitor creates an account and lands on the Today tab ready to write their first entry.",
       "steps": [
-        { "from": "user-electron-repo", "to": "td-cli",          "label": "invoke CLI",       "description": "Developer runs `todesktop build`. Reads todesktop.json, validates against packages/cli/schemas/schema.json." },
-        { "from": "td-cli",             "to": "fb-auth",         "label": "getIdToken()",     "description": "packages/cli/src/utilities/firestore.ts — exchanges cached Firebase Auth credentials for an idToken." },
-        { "from": "td-cli",             "to": "fns-builds",      "label": "prepareNewBuild()", "description": "HTTP function. Payload: appId, appVersion, projectConfig, shouldCodeSign, versionControlInfo, breakpoints." },
-        { "from": "fns-builds",         "to": "firestore",       "label": "create build doc", "description": "Writes a builds/{id} doc with status=queued and the resolved manifest." },
-        { "from": "fns-builds",         "to": "azure-pipelines", "label": "kickOff()",        "description": "POSTs to Azure DevOps Pipelines REST API to start a Mac/Win/Linux build matrix." },
-        { "from": "azure-pipelines",    "to": "apple-notarize",  "label": "notarize",         "description": "Mac jobs upload signed artifacts to Apple notary service via altool, then staple." }
+        { "from": "landing",       "to": "signup",        "label": "Tap 'Get started'",
+          "description": "User clicks the primary CTA on the marketing landing page." },
+        { "from": "signup",        "to": "verify",        "label": "Submit email + password",
+          "description": "User submits credentials; a 6-digit verification code is emailed to them." },
+        { "from": "verify",        "to": "welcome",       "label": "Enter 6-digit code",
+          "description": "User types the code from email and is dropped into the onboarding flow." },
+        { "from": "welcome",       "to": "pick-reminder", "label": "Type first name, tap 'Next'",
+          "description": "User enters their first name (used in the daily greeting) and continues." },
+        { "from": "pick-reminder", "to": "today",         "label": "Confirm reminder time",
+          "description": "User accepts the default 8pm reminder (or picks another) and lands on the Today tab." },
+        { "from": "welcome",       "to": "welcome-email", "label": "(automatic) Welcome email sent",
+          "description": "While the user is onboarding, a welcome email is delivered to their inbox so it's there when they next check mail." }
       ]
     },
     {
-      "id": "todesktop-release",
-      "title": "todesktop release (publish as latest)",
-      "description": "Developer marks a successful build as the new 'latest' for end users.",
+      "id": "write-entry",
+      "title": "Write today's entry",
+      "description": "Returning user receives their daily reminder, opens the app, and writes today's entry.",
       "steps": [
-        { "from": "user-electron-repo", "to": "td-cli",      "label": "todesktop release", "description": "CLI prompts to pick a build (or takes the latest successful one)." },
-        { "from": "td-cli",             "to": "fns-builds",  "label": "releaseBuild()",    "description": "HTTP function in functions/builds/. Validates ownership, ensures build is releasable." },
-        { "from": "fns-builds",         "to": "firestore",   "label": "set meta.latestReleaseBuildId", "description": "Writes the new pointer on the app doc — this is the source of truth the CDN reads." },
-        { "from": "firestore",          "to": "cdn-workers", "label": "purge / refresh",   "description": "Workers read meta.latestReleaseBuildId on each download request; cache TTL ensures fast cutover." }
+        { "from": "push-reminder", "to": "today",  "label": "Tap notification",
+          "description": "The daily reminder fires at the user's chosen time; tapping it opens Quill on the Today tab." },
+        { "from": "today",         "to": "editor", "label": "Tap 'Write today'",
+          "description": "User taps the primary action card on Today, which opens an empty editor for today's date." },
+        { "from": "editor",        "to": "today",  "label": "Tap 'Save'",
+          "description": "User writes their entry, taps Save, and returns to Today with the entry marked complete." }
+      ]
+    },
+    {
+      "id": "review-past",
+      "title": "Re-read or edit a past entry",
+      "description": "User browses their archive and revisits an old entry.",
+      "steps": [
+        { "from": "today",   "to": "history", "label": "Tap 'History' tab",
+          "description": "User switches from Today to the History tab in the bottom nav." },
+        { "from": "history", "to": "editor",  "label": "Tap an entry",
+          "description": "User taps a past entry from the chronological list; the editor opens in read mode with an Edit affordance." }
+      ]
+    },
+    {
+      "id": "change-reminder",
+      "title": "Change reminder time",
+      "description": "User adjusts when their daily reminder fires.",
+      "steps": [
+        { "from": "today",         "to": "account",       "label": "Tap profile avatar",
+          "description": "User opens the account screen from the top-right of the Today tab." },
+        { "from": "account",       "to": "reminder-pref", "label": "Tap 'Reminders'",
+          "description": "User opens the reminder preferences screen." },
+        { "from": "reminder-pref", "to": "today",         "label": "Pick new time, tap 'Save'",
+          "description": "User selects a new time on the picker, taps Save, and is returned to Today. The next reminder will fire at the new time." }
       ]
     }
   ]
-}
-;
+};
