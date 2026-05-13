@@ -1,6 +1,6 @@
-# Standard userflow names
+# Userflow types
 
-A reference taxonomy of common user-journey names, organized by category. Use these when naming flows so captures stay consistent across projects and don't drift into custom one-off names where a standard fits.
+A reference taxonomy of common user-journey types, grouped into six categories: **New User Experience**, **Account Management**, **Commerce & Finance**, **Social**, **Content**, and **Misc**. Use these when naming flows so captures stay consistent across projects and don't drift into custom one-off names where a standard fits.
 
 ## How to use this list
 

@@ -80,7 +80,7 @@ find . \( -name userflows.js -o -name userflows.json -o -name userflows.html -o 
 
 The output is **two files in `docs/`**: the viewer (`userflows.html`) and the data (`userflows.js`). No build step, no server, no generators. Copy the template verbatim, write the data file by hand.
 
-1. **Pick the journeys first.** A flow is something a real user *does*. **Name each flow using the standard taxonomy in `references/flow-names.md`** (Onboarding, Creating Account, Editing Profile, Purchasing & Ordering, Sharing, Resetting Password, etc.). Only invent custom names when no standard fits, and mimic the imperative-gerund voice of the list. Aim for **3–6 flows** that together cover the product's reason for existing. If you can't find user-visible flows by reading routes, screens, and entry points — **ask the user** which journeys matter. Do not invent flows from backend code.
+1. **Pick the journeys first.** A flow is something a real user *does*. **Name each flow using the standard taxonomy in `references/userflow-types.md`** (Onboarding, Creating Account, Editing Profile, Purchasing & Ordering, Sharing, Resetting Password, etc.). Only invent custom names when no standard fits, and mimic the imperative-gerund voice of the list. Aim for **3–6 flows** that together cover the product's reason for existing. If you can't find user-visible flows by reading routes, screens, and entry points — **ask the user** which journeys matter. Do not invent flows from backend code.
 2. **List user-facing surfaces as lanes.** Lanes group nodes by where the user is. Examples: `Marketing site → Sign-up → Onboarding → Main app → Settings → Email/Push`. Keep lanes at the **product-surface** level. Never use lanes like "Server", "Database", "Functions" — those are tech locations, not user locations.
 3. **List nodes the user actually encounters.** Each node is a screen, modal, decision point, push notification, or email — anything with a user-visible surface. Title is what a user would call it (`Sign up screen`, `Today tab`, `Welcome email`), not what a developer would call it (`SignUpForm.tsx`).
 4. **Write each flow as steps the user takes.** Each step is `{from, to, label, description}`:
@@ -99,7 +99,7 @@ Source files in this skill:
 - `template.html` — drop-in viewer. **Do not edit the viewer logic unless the user asks for a visual change.**
 - `schema.json` — JSON Schema for the object inside `window.USERFLOWS`. Validate against it.
 - `example.userflows.js` — reference example (Quill, a fictional journaling app). Use as a model for the shape and *the voice* of `userflows.js`.
-- `references/flow-names.md` — standard userflow-name taxonomy organized by category (New User Experience, Account Management, Commerce & Finance, Social, Content, Misc). **Read this before naming flows.**
+- `references/userflow-types.md` — standard userflow-name taxonomy organized by category (New User Experience, Account Management, Commerce & Finance, Social, Content, Misc). **Read this before naming flows.**
 
 ## Consuming — when `userflows.js` already exists
 
@@ -158,7 +158,7 @@ The user-facing description comes first. The code pointer is a footnote.
 ## Common mistakes
 
 - **Mapping backend pipelines instead of user journeys.** A cron job that generates content overnight is not a flow. A webhook chain is not a flow. A flow is what a *person* does, sees, taps, reads, or receives. If no user is on the other end of any step, delete the flow.
-- **Inventing overly specific flow names when a standard taxonomy entry fits.** "Sign up and finish onboarding then receive the first push notification" is a custom mouthful for what's just **Onboarding**. Check `references/flow-names.md` first; the product-specific detail belongs in the flow `description`, not the title.
+- **Inventing overly specific flow names when a standard taxonomy entry fits.** "Sign up and finish onboarding then receive the first push notification" is a custom mouthful for what's just **Onboarding**. Check `references/userflow-types.md` first; the product-specific detail belongs in the flow `description`, not the title.
 - **Lanes as tech locations.** "Server", "Functions", "Database", "External APIs" are wrong. Use product surfaces: "Marketing", "Sign-up", "Onboarding", "Main app", "Settings", "Email/Push".
 - **Nodes that aren't user-visible.** A Firestore collection, a queue, an internal function — none of these belong as nodes. Screens, modals, emails, push notifications, in-app banners, decision points the user encounters — those are nodes.
 - **Step descriptions written from the system's POV.** Rewrite "Convex emits an event" as "User taps Save; app confirms the entry was saved." If you can't rephrase a step in the user's voice, the step probably doesn't belong in this file.

@@ -3,7 +3,7 @@
 // every step is something a real user does, sees, taps, or receives — not a
 // backend trace. Code pointers (if any) are footnotes after an em dash.
 //
-// Flow titles use the standard taxonomy from references/flow-names.md
+// Flow titles use the standard taxonomy from references/userflow-types.md
 // (Onboarding, Logging & Tracking, Editing & Updating, …). Custom names are
 // allowed when nothing fits — "Changing Reminder" here — but stay in the
 // same imperative-gerund voice.
