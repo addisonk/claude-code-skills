@@ -1,6 +1,6 @@
 ---
 name: userflow-capture
-description: Use when the user invokes `/userflow-capture` or asks to document, map, or explain the main userflows / user journeys of their app ("what does signup look like", "map the main userflows", "how does a user go from X to Y"), OR when a `userflows.js` file is present in the repo — in which case read it before answering questions, planning features, or fixing bugs that touch any of the listed userflows.
+description: Use when the user invokes `/userflow-capture` (full capture of 3–6 main userflows) or `/userflow-capture <name>` (single userflow — extract one existing flow or plan a new one for adoption inside a larger project), or asks to document / map / explain userflows in any form ("map our main userflows", "document just our onboarding", "let's plan our v2 checkout"), OR when a `userflows.js` file is present in the repo — in which case read it before answering questions, planning features, or fixing bugs that touch any of the listed userflows.
 user-invocable: true
 argument-hint: "[userflow name]"
 ---
@@ -26,19 +26,35 @@ Both files live next to each other. The HTML loads `./userflows.js` with a plain
 ```dot
 digraph entry {
   "Skill activates" [shape=doublecircle];
+  "Named a specific userflow?" [shape=diamond];
   "userflows.js exists?" [shape=diamond];
+  "userflows.js exists (single)?" [shape=diamond];
+  "Single mode: append" [shape=box];
+  "Single mode: create starter" [shape=box];
   "Read it → consuming path" [shape=box];
   "AskUserQuestion: create one?" [shape=box];
-  "Producing path" [shape=box];
+  "Full producing path" [shape=box];
   "Stop, no capture work" [shape=box];
 
-  "Skill activates" -> "userflows.js exists?";
+  "Skill activates" -> "Named a specific userflow?";
+  "Named a specific userflow?" -> "userflows.js exists?" [label="no"];
+  "Named a specific userflow?" -> "userflows.js exists (single)?" [label="yes"];
+  "userflows.js exists (single)?" -> "Single mode: append" [label="yes"];
+  "userflows.js exists (single)?" -> "Single mode: create starter" [label="no"];
   "userflows.js exists?" -> "Read it → consuming path" [label="yes"];
   "userflows.js exists?" -> "AskUserQuestion: create one?" [label="no"];
-  "AskUserQuestion: create one?" -> "Producing path" [label="yes"];
+  "AskUserQuestion: create one?" -> "Full producing path" [label="yes"];
   "AskUserQuestion: create one?" -> "Stop, no capture work" [label="no / skip"];
 }
 ```
+
+**Step 0 — Did the user name a specific userflow?** Check the prompt for single-flow intent:
+- Explicit arg: `/userflow-capture onboarding`
+- "Just" / "only" phrasing: *"document just our checkout"*, *"only the signup flow"*
+- Single-flow nouns in the request: *"capture our onboarding"*, *"document our login flow"*
+- Forward-looking design: *"plan our v2 onboarding"*, *"design the new checkout"*, *"we're building..."*
+
+If yes → jump to **Single userflow mode** below (it handles file-existence and source-of-truth internally). If no → continue with the full-capture routine.
 
 **Step 1 — Look for the file.** Run:
 ```bash
@@ -126,6 +142,42 @@ Source files in this skill:
 - `schema.json` — JSON Schema for the object inside `window.USERFLOWS`. Validate against it.
 - `example.userflows.js` — reference example (Quill, a fictional journaling app). Use as a model for the shape and *the voice* of `userflows.js`.
 - `references/userflow-types.md` — standard userflow-name taxonomy organized by category (New User Experience, Account Management, Commerce & Finance, Social, Content, Misc). **Read this before naming userflows.**
+
+## Single userflow mode
+
+Triggered when the user names a specific userflow in their prompt (or invokes `/userflow-capture <flow-name>`). Useful for adopting the skill incrementally inside a larger project, or for sketching a userflow you're planning to build before writing code. This mode produces or updates exactly **one** userflow — not 3–6.
+
+Two axes determine what happens:
+
+### Output: append vs. create starter
+
+Branch on whether `userflows.js` already exists in the repo:
+
+- **`userflows.js` already exists → append.** Read the file, parse the `window.USERFLOWS = { ... }` object (it's JSON-compatible — strip the assignment prefix and trailing `;`, then `JSON.parse`). Add the new userflow to the `flows` array, and append any new nodes (and any new lanes those nodes reference) to the `nodes` and `lanes` arrays — **dedupe by `id`**, never duplicate existing entries. Write the file back as `window.USERFLOWS = ${JSON.stringify(...)};`. The HTML stays untouched — it's a drop-in viewer.
+  - **Id collision** (a userflow with this id already exists): use **AskUserQuestion** — *"A userflow with id `<id>` already exists. Replace it / Add as a new one with id `<id>-v2` / Cancel."*
+
+- **`userflows.js` doesn't exist → create starter.** Write a fresh `docs/userflows.js` and `docs/userflows.html` (copy of `template.html`, unmodified) with just this one userflow. The user can grow the file later by re-invoking with another flow name — the next call will be in append mode.
+
+### Source: extract vs. plan
+
+Branch on whether the userflow already exists in the codebase:
+
+- **Extract existing.** The flow is implemented. Read routes, screens, components, and entry points to build the steps from real code — same procedure as full-capture's steps 2–5 (Pick the journey → Lanes → Nodes → Write the steps), but narrowed to just this one userflow.
+
+- **Plan new.** The flow doesn't exist yet (forward-looking design — v2 onboarding, a new checkout, a redesigned settings screen). Take the user's description as input. Use **AskUserQuestion** liberally to fill gaps: *"What screens does the user pass through?"*, *"What's the entry point — a push, a link, a button in settings?"*, *"What's the final destination — a success screen, return to home, an email confirmation?"*. **Don't pretend to extract from code that isn't there yet** — the value of a planned userflow comes from honest design intent, not fabricated detail.
+
+If which one applies is unclear, ask: *"Is this an existing flow you want documented, or are you planning a new one?"*
+
+### Procedure summary
+
+1. **Detect intent** (from the entry routine — single-flow mode was triggered).
+2. **Pick source.** Extract from code, or plan from user input. Ask if ambiguous.
+3. **Logo + platform** (only if create-starter and the user mentions them — when appending, inherit `project.logo` and any `platform` convention from the existing file).
+4. **Build the one userflow** following Producing steps 2–5 (Pick the journey → Lanes → Nodes → Steps), scoped to just this flow. Name it using `references/userflow-types.md`.
+5. **Write**:
+   - *Append mode:* parse existing `userflows.js`, merge in the new flow + any new nodes/lanes, write back.
+   - *Create-starter mode:* write `docs/userflows.js` (one flow) + `docs/userflows.html` (template copy).
+6. **Preview** with `open docs/userflows.html`.
 
 ## Consuming — when `userflows.js` already exists
 

@@ -265,15 +265,10 @@
       }
     });
 
-    // Determine the incoming step number for each node (the step that brought us here).
-    // The start node has no incoming step → no eyebrow.
-    const incomingStep = new Map();
-    (flow.steps || []).forEach((s, idx) => {
-      if (!incomingStep.has(s.to)) incomingStep.set(s.to, idx + 1);
-    });
-
-    // Render node cards with explicit grid placement
-    order.forEach((id) => {
+    // Render node cards with explicit grid placement. Each card carries its
+    // 1-indexed position in the userflow as its STEP N eyebrow — the start
+    // node is Step 1, the next is Step 2, and so on (including branched leaves).
+    order.forEach((id, idx) => {
       const node = nodeById.get(id);
       const el = document.createElement("div");
       el.className = "node";
@@ -282,9 +277,8 @@
       el.style.gridColumn = String(col.get(id) + 1);
       const title = node?.title ?? id;
       const sub = node?.subtitle;
-      const stepNum = incomingStep.get(id);
       el.innerHTML = `
-        ${stepNum ? `<div class="step-num">Step ${stepNum}</div>` : ""}
+        <div class="step-num">Step ${idx + 1}</div>
         <div class="title">${escapeHtml(title)}</div>
         ${sub ? `<div class="sub">${escapeHtml(sub)}</div>` : ""}
       `;
