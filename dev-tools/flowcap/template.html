@@ -109,18 +109,38 @@
   </aside>
 </div>
 
+<!--
+  Flow data lives in this <script> block. Replace the JSON below with your
+  project's userflows data (schema: see schema.json in the flowcap skill).
+  Keep the id="userflows" — the viewer reads from it on load.
+-->
+<script type="application/json" id="userflows">
+{
+  "project": { "name": "", "description": "" },
+  "defaults": { "autoSelectFirst": true },
+  "lanes": [],
+  "nodes": [],
+  "flows": []
+}
+</script>
+
 <script>
-(async function () {
+(function () {
   const SVG = "http://www.w3.org/2000/svg";
   const $ = (id) => document.getElementById(id);
 
   let data;
   try {
-    const res = await fetch("./userflows.json", { cache: "no-store" });
-    data = await res.json();
+    const raw = document.getElementById("userflows")?.textContent || "{}";
+    data = JSON.parse(raw);
   } catch (err) {
-    $("title").textContent = "Could not load userflows.json";
+    $("title").textContent = "Could not parse embedded userflows JSON";
     $("subtitle").textContent = String(err);
+    return;
+  }
+  if (!data.lanes?.length || !data.flows?.length) {
+    $("title").textContent = "No flow data embedded yet";
+    $("subtitle").textContent = 'Fill in the <script id="userflows"> block in this file.';
     return;
   }
 
