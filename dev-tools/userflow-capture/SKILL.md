@@ -80,14 +80,25 @@ find . \( -name userflows.js -o -name userflows.json -o -name userflows.html -o 
 
 The output is **two files in `docs/`**: the viewer (`userflows.html`) and the data (`userflows.js`). No build step, no server, no generators. Copy the template verbatim, write the data file by hand.
 
-1. **Pick the journeys first.** A userflow is something a real user *does*. **Name each userflow using the standard taxonomy in `references/userflow-types.md`** (Onboarding, Creating Account, Editing Profile, Purchasing & Ordering, Sharing, Resetting Password, etc.). Only invent custom names when no standard fits, and mimic the imperative-gerund voice of the list. Aim for **3–6 userflows** that together cover the product's reason for existing. If you can't find user-visible userflows by reading routes, screens, and entry points — **ask the user** which journeys matter. Do not invent userflows from backend code.
-2. **List user-facing surfaces as lanes.** Lanes group nodes by where the user is. Examples: `Marketing site → Sign-up → Onboarding → Main app → Settings → Email/Push`. Keep lanes at the **product-surface** level. Never use lanes like "Server", "Database", "Functions" — those are tech locations, not user locations.
-3. **List nodes the user actually encounters.** Each node is a screen, modal, decision point, push notification, or email — anything with a user-visible surface. Title is what a user would call it (`Sign up screen`, `Today tab`, `Welcome email`), not what a developer would call it (`SignUpForm.tsx`).
-4. **Write each userflow as steps the user takes.** Each step is `{from, to, label, description}`:
+1. **Detect platforms before picking journeys.** Many projects ship more than one app (e.g. a Next.js web app *and* an Expo iOS app in a monorepo). Userflows often differ across platforms — signup steps, screens, and notifications all change — so capturing them under one flat list muddles the doc. Quickly scan for app types:
+   - **Web** — `next.config.*`, `vite.config.*`, `astro.config.*`, `remix.config.*`, or `package.json` deps `next` / `vite` / `react-scripts`
+   - **Expo / React Native** — `app.json` containing `"expo"`, `app.config.*`, `expo` in package.json deps; bare RN adds `react-native.config.*`, `metro.config.*`, `ios/` + `android/` dirs
+   - **iOS native** — `*.xcodeproj`, `*.xcworkspace`, `Podfile`
+   - **Android native** — `app/build.gradle`, `gradlew`
+   - **Flutter** — `pubspec.yaml`
+
+   If **more than one platform is detected**, use **AskUserQuestion**. Question: *"Detected {comma-separated list of platforms}. Capture userflows for which?"* Options (pick the relevant 3 based on what was detected): **All, grouped by platform** / **{Platform A} only** / **{Platform B} only**. If only one platform is detected (or none clearly), skip the question and proceed.
+
+   **When capturing multiple platforms**, set `platform` on each flow (e.g. `"platform": "Web"`, `"platform": "iOS"`). The viewer groups the sidebar nav by these labels and adds a matching eyebrow above each section's H2. The same flow title can repeat under different platforms — just use distinct `id`s like `onboarding-web` and `onboarding-ios`.
+
+2. **Pick the journeys.** A userflow is something a real user *does*. **Name each userflow using the standard taxonomy in `references/userflow-types.md`** (Onboarding, Creating Account, Editing Profile, Purchasing & Ordering, Sharing, Resetting Password, etc.). Only invent custom names when no standard fits, and mimic the imperative-gerund voice of the list. Aim for **3–6 userflows per platform** that together cover the product's reason for existing. If you can't find user-visible userflows by reading routes, screens, and entry points — **ask the user** which journeys matter. Do not invent userflows from backend code.
+3. **List user-facing surfaces as lanes.** Lanes group nodes by where the user is. Examples: `Marketing site → Sign-up → Onboarding → Main app → Settings → Email/Push`. Keep lanes at the **product-surface** level. Never use lanes like "Server", "Database", "Functions" — those are tech locations, not user locations.
+4. **List nodes the user actually encounters.** Each node is a screen, modal, decision point, push notification, or email — anything with a user-visible surface. Title is what a user would call it (`Sign up screen`, `Today tab`, `Welcome email`), not what a developer would call it (`SignUpForm.tsx`).
+5. **Write each userflow as steps the user takes.** Each step is `{from, to, label, description}`:
    - `from` / `to` — node ids (the user moves from one surface to another, or stays put and triggers something)
    - `label` — the action in plain language: *"Tap **Get started**"*, *"Enter email and password"*, *"Confirm payment"*
    - `description` — one sentence in the user's voice or third-person POV, describing what they see/do. **Optionally append a code pointer after `—` for LLM debugging context.** Example: *"User taps **Save** in the editor — `app/editor/page.tsx`, calls `useSaveEntry()`."*
-5. **Find or ask for the product logo (optional but recommended).** A logo in the header makes the doc feel like the product's, not a generic template. The viewer renders it as a white silhouette above the title via `filter: brightness(0) invert(1)`, so any mono or multi-color logo works.
+6. **Find or ask for the product logo (optional but recommended).** A logo in the header makes the doc feel like the product's, not a generic template. The viewer renders it as a white silhouette above the title via `filter: brightness(0) invert(1)`, so any mono or multi-color logo works.
    - **Auto-detect** common spots:
      ```bash
      find . -maxdepth 4 \( -name "logo.svg" -o -name "logo.png" -o -name "logo.jpg" \
@@ -102,13 +113,13 @@ The output is **two files in `docs/`**: the viewer (`userflows.html`) and the da
      - **SVG:** read the file and paste the raw SVG markup as the string value of `project.logo`. Inline SVG keeps the artifact crisp at any zoom.
      - **PNG / JPG:** base64-encode and set `project.logo` to `"data:image/png;base64,…"` (or `image/jpeg`). The artifact stays self-contained.
    - Skipping is fine — the text title reads cleanly on its own.
-6. **Write the two files.** Place both at the project's docs root:
+7. **Write the two files.** Place both at the project's docs root:
    ```
    docs/userflows.html   ← copy of template.html, unmodified
    docs/userflows.js     ← project data, exactly this shape:
                             window.USERFLOWS = { /* validated against schema.json */ };
    ```
-7. **Preview.** Open the file directly — `open docs/userflows.html` on macOS, or double-click. It works on `file://`; no server needed. Click each userflow and verify the steps read like a real person moving through the app, not like a backend trace.
+8. **Preview.** Open the file directly — `open docs/userflows.html` on macOS, or double-click. It works on `file://`; no server needed. Click each userflow and verify the steps read like a real person moving through the app, not like a backend trace.
 
 Source files in this skill:
 - `template.html` — drop-in viewer. **Do not edit the viewer logic unless the user asks for a visual change.**
@@ -136,9 +147,10 @@ The object assigned to `window.USERFLOWS` (validated by `schema.json`):
   "lanes":    [ { "id": "onboarding", "label": "Onboarding", "color": "#34d399" } ],
   "nodes":    [ { "id": "welcome", "lane": "onboarding", "title": "Welcome screen", "subtitle": "name + intro" } ],
   "flows":    [ {
-    "id": "sign-up",
-    "title": "Sign up and finish onboarding",
-    "description": "A new visitor creates an account and lands on the Today screen ready to use the product.",
+    "id": "onboarding-web",
+    "title": "Onboarding",
+    "platform": "Web",                          // optional: groups sidebar by platform
+    "description": "A new visitor creates an account and lands on the Today screen.",
     "steps": [
       { "from": "landing", "to": "signup", "label": "Tap 'Get started'",
         "description": "User clicks the primary CTA on the marketing landing page." }
@@ -147,7 +159,7 @@ The object assigned to `window.USERFLOWS` (validated by `schema.json`):
 }
 ```
 
-All ids are kebab-case `^[a-z0-9-]+$`. Lane order = column order in the diagram. Steps reference nodes by id.
+All ids are kebab-case `^[a-z0-9-]+$`. Lane order = column order in the diagram. Steps reference nodes by id. The `platform` field is optional — set it on every userflow if the project captures multiple platforms (Web, iOS, Android, Expo, etc.); omit it everywhere for a single-platform flat list.
 
 ## Writing good step descriptions
 

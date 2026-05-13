@@ -55,6 +55,7 @@
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
           "title": { "type": "string", "description": "Imperative or short noun phrase. Used in the sidebar nav and as the userflow's section heading." },
+          "platform": { "type": "string", "description": "Optional. Groups this userflow under a platform header in the sidebar nav (e.g. 'Web', 'iOS', 'Android', 'Expo'). When any userflow has this set, the sidebar groups by platform and the section header gets a matching eyebrow; when none do, the sidebar shows a single 'Userflows' header (default flat behavior)." },
           "description": { "type": "string", "description": "One-line explanation shown under the title." },
           "steps": {
             "type": "array",

@@ -36,7 +36,8 @@
   }
   aside.toc h3 { font: 600 11px/1 ui-sans-serif, system-ui; letter-spacing: 0.14em;
     color: var(--muted); text-transform: uppercase; margin: 0 0 14px; padding: 0 10px; }
-  aside.toc ul { list-style: none; padding: 0; margin: 0; }
+  aside.toc ul { list-style: none; padding: 0; margin: 0 0 24px; }
+  aside.toc ul:last-child { margin-bottom: 0; }
   aside.toc a { display: block; font-size: 13px; color: var(--muted); text-decoration: none;
     padding: 8px 12px; border-radius: 6px; line-height: 1.4;
     transition: color .15s, background .15s; }
@@ -60,6 +61,9 @@
   section.flow { margin-top: 56px; scroll-margin-top: 20px; }
   section.flow:first-of-type { margin-top: 0; }
   section.flow > header { margin-bottom: 18px; }
+  section.flow > header .platform-label { font: 600 11px/1 ui-sans-serif, system-ui;
+    letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase;
+    margin-bottom: 10px; }
   section.flow > header h2 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.005em; }
   section.flow > header p { margin: 0; color: var(--muted); max-width: 80ch; }
 
@@ -104,8 +108,7 @@
 <body>
 <div class="app">
   <aside class="toc">
-    <h3>Userflows</h3>
-    <ul id="toc"></ul>
+    <div id="toc"></div>
   </aside>
   <main class="content">
     <header class="page">
@@ -172,16 +175,32 @@
   // Lookup tables
   const nodeById = new Map((data.nodes || []).map((n) => [n.id, n]));
 
-  // Sidebar TOC
+  // Sidebar TOC. When any userflow has a platform set, group the nav by platform
+  // ("Web", "iOS", etc. as section headers). Otherwise use a single "Userflows"
+  // header (flat list — the default behavior).
   const tocEl = $("toc");
+  const hasPlatforms = data.flows.some((f) => f.platform);
+  const groups = new Map();
   data.flows.forEach((f, i) => {
-    const li = document.createElement("li");
-    const a = document.createElement("a");
-    a.href = `#flow-${f.id ?? i}`;
-    a.textContent = f.title || `Userflow ${i + 1}`;
-    a.dataset.target = `flow-${f.id ?? i}`;
-    li.appendChild(a);
-    tocEl.appendChild(li);
+    const key = hasPlatforms ? (f.platform || "Other") : "Userflows";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ f, i });
+  });
+  groups.forEach((flows, label) => {
+    const h3 = document.createElement("h3");
+    h3.textContent = label;
+    tocEl.appendChild(h3);
+    const ul = document.createElement("ul");
+    flows.forEach(({ f, i }) => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = `#flow-${f.id ?? i}`;
+      a.textContent = f.title || `Userflow ${i + 1}`;
+      a.dataset.target = `flow-${f.id ?? i}`;
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    tocEl.appendChild(ul);
   });
 
   // Render each userflow as its own section
@@ -191,8 +210,14 @@
     section.className = "flow";
     section.id = `flow-${flow.id ?? i}`;
 
-    // Header
+    // Header (with optional platform eyebrow when grouping by platform)
     const header = document.createElement("header");
+    if (flow.platform) {
+      const eyebrow = document.createElement("div");
+      eyebrow.className = "platform-label";
+      eyebrow.textContent = flow.platform;
+      header.appendChild(eyebrow);
+    }
     const h2 = document.createElement("h2");
     h2.textContent = flow.title || `Userflow ${i + 1}`;
     header.appendChild(h2);
