@@ -21,17 +21,34 @@
     font: 14px/1.5 ui-sans-serif, -apple-system, "SF Pro Text", Inter, system-ui, sans-serif; }
   code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
 
-  .app { max-width: 1400px; margin: 0 auto; padding: 40px 32px 80px; }
+  .app { max-width: 1400px; margin: 0 auto; padding: 40px 32px 80px;
+    display: grid; grid-template-columns: 220px 1fr; gap: 56px; }
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; gap: 32px; }
+  }
+  main.content { min-width: 0; }
+
+  /* Sticky left sidebar nav */
+  aside.toc { position: sticky; top: 32px; align-self: start;
+    max-height: calc(100vh - 64px); overflow-y: auto; padding-right: 4px; }
+  @media (max-width: 900px) {
+    aside.toc { position: static; max-height: none; }
+  }
+  aside.toc h3 { font: 600 11px/1 ui-sans-serif, system-ui; letter-spacing: 0.14em;
+    color: var(--muted); text-transform: uppercase; margin: 0 0 14px; padding: 0 10px; }
+  aside.toc ul { list-style: none; padding: 0; margin: 0; }
+  aside.toc a { display: block; font-size: 13px; color: var(--muted); text-decoration: none;
+    padding: 7px 10px; border-radius: 6px; line-height: 1.4;
+    transition: color .15s, background .15s, border-color .15s;
+    border-left: 2px solid transparent; }
+  aside.toc a:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  aside.toc a.active { color: var(--text); border-left-color: var(--accent);
+    background: rgba(107,33,168,0.08); }
 
   /* Header */
   header.page { margin-bottom: 40px; }
   header.page h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
-  header.page p { margin: 0 0 18px; color: var(--muted); max-width: 80ch; }
-  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-  .toc a { font-size: 12px; color: var(--muted); text-decoration: none;
-    padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px;
-    transition: color .15s, border-color .15s, background .15s; }
-  .toc a:hover { color: var(--text); border-color: var(--dim); background: var(--panel); }
+  header.page p { margin: 0; color: var(--muted); max-width: 80ch; }
 
   /* Flow section */
   section.flow { margin-top: 56px; scroll-margin-top: 20px; }
@@ -80,12 +97,17 @@
 </head>
 <body>
 <div class="app">
-  <header class="page">
-    <h1 id="title">Loading…</h1>
-    <p id="subtitle"></p>
-    <nav class="toc" id="toc"></nav>
-  </header>
-  <main id="flows"></main>
+  <aside class="toc">
+    <h3>Flows</h3>
+    <ul id="toc"></ul>
+  </aside>
+  <main class="content">
+    <header class="page">
+      <h1 id="title">Loading…</h1>
+      <p id="subtitle"></p>
+    </header>
+    <div id="flows"></div>
+  </main>
 </div>
 
 <!--
@@ -119,13 +141,16 @@
   // Lookup tables
   const nodeById = new Map((data.nodes || []).map((n) => [n.id, n]));
 
-  // TOC
+  // Sidebar TOC
   const tocEl = $("toc");
   data.flows.forEach((f, i) => {
+    const li = document.createElement("li");
     const a = document.createElement("a");
     a.href = `#flow-${f.id ?? i}`;
     a.textContent = f.title || `Flow ${i + 1}`;
-    tocEl.appendChild(a);
+    a.dataset.target = `flow-${f.id ?? i}`;
+    li.appendChild(a);
+    tocEl.appendChild(li);
   });
 
   // Render each flow as its own section
@@ -329,6 +354,54 @@
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(renderAllArrows, 80);
   });
+
+  // Scroll spy: highlight the TOC entry for the section currently in view.
+  // Default to the first flow on load. Track which flows are currently in the
+  // trigger zone; if none are, fall back to the last flow whose top has scrolled
+  // above the zone (i.e., what the user is reading past) — or the first flow if
+  // we're still above all of them.
+  const tocLinks = new Map();
+  document.querySelectorAll("aside.toc a").forEach((a) => {
+    tocLinks.set(a.dataset.target, a);
+  });
+  const allSections = Array.from(document.querySelectorAll("section.flow"));
+  const intersecting = new Set();
+
+  function setActive(id) {
+    if (!id) return;
+    document.querySelectorAll("aside.toc a.active").forEach((el) => el.classList.remove("active"));
+    tocLinks.get(id)?.classList.add("active");
+  }
+
+  function recomputeActive() {
+    let id;
+    if (intersecting.size > 0) {
+      // Topmost intersecting section
+      id = [...intersecting].sort((a, b) =>
+        document.getElementById(a).getBoundingClientRect().top -
+        document.getElementById(b).getBoundingClientRect().top
+      )[0];
+    } else {
+      // Fall back: the last section whose top has scrolled past the trigger zone,
+      // or the first section if we're still above all of them.
+      const triggerY = window.innerHeight * 0.2;
+      const above = allSections.filter((s) => s.getBoundingClientRect().top < triggerY);
+      id = (above[above.length - 1] || allSections[0])?.id;
+    }
+    setActive(id);
+  }
+
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) intersecting.add(entry.target.id);
+      else intersecting.delete(entry.target.id);
+    });
+    recomputeActive();
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  allSections.forEach((s) => spy.observe(s));
+
+  // Initial active on first paint
+  setActive(allSections[0]?.id);
 })();
 </script>
 </body>
