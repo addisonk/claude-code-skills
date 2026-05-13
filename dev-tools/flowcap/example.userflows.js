@@ -1,4 +1,6 @@
-{
+// Example userflows.js — drop this next to flowcap.html in your project.
+// See schema.json for the full data shape.
+window.USERFLOWS = {
   "project": {
     "name": "ToDesktop",
     "description": "Every package and external service that powers ToDesktop Builder and ToDesktop for Electron. Pick a flow on the right to highlight the path through the system and see what gets passed at each step."
@@ -50,3 +52,4 @@
     }
   ]
 }
+;

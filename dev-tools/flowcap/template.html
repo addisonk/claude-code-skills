@@ -110,37 +110,26 @@
 </div>
 
 <!--
-  Flow data lives in this <script> block. Replace the JSON below with your
-  project's userflows data (schema: see schema.json in the flowcap skill).
-  Keep the id="userflows" — the viewer reads from it on load.
+  Flow data is loaded from the sibling `userflows.js`, which must define
+  window.USERFLOWS. Keep the two files side-by-side. See schema.json in
+  the flowcap skill for the data shape.
 -->
-<script type="application/json" id="userflows">
-{
-  "project": { "name": "", "description": "" },
-  "defaults": { "autoSelectFirst": true },
-  "lanes": [],
-  "nodes": [],
-  "flows": []
-}
-</script>
+<script src="./userflows.js"></script>
 
 <script>
 (function () {
   const SVG = "http://www.w3.org/2000/svg";
   const $ = (id) => document.getElementById(id);
 
-  let data;
-  try {
-    const raw = document.getElementById("userflows")?.textContent || "{}";
-    data = JSON.parse(raw);
-  } catch (err) {
-    $("title").textContent = "Could not parse embedded userflows JSON";
-    $("subtitle").textContent = String(err);
+  const data = (typeof window !== "undefined" && window.USERFLOWS) || null;
+  if (!data) {
+    $("title").textContent = "Could not load userflows.js";
+    $("subtitle").textContent = "Make sure userflows.js sits next to this HTML file and defines window.USERFLOWS.";
     return;
   }
   if (!data.lanes?.length || !data.flows?.length) {
-    $("title").textContent = "No flow data embedded yet";
-    $("subtitle").textContent = 'Fill in the <script id="userflows"> block in this file.';
+    $("title").textContent = "No flow data";
+    $("subtitle").textContent = "userflows.js loaded but has no lanes/flows.";
     return;
   }
 
