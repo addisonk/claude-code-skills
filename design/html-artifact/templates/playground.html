@@ -22,9 +22,9 @@
 </head>
 <body>
   <header class="doc-header">
-    <p class="eyebrow">Playground</p>
+    <p class="eyebrow">Playground · throwaway editor</p>
     <h1>[Playground title]</h1>
-    <p class="summary">[What this playground lets you tune, and how to export the result back to Claude.]</p>
+    <p class="summary">[What this playground lets you tune. End on: "click <em>Copy as prompt</em> to paste the result back into Claude."]</p>
   </header>
 
   <div class="layout">
@@ -69,21 +69,46 @@
             Label
             <input type="text" id="ctl-label" value="Hello">
           </label>
+          <label class="toggle">
+            <input type="checkbox" id="ctl-spring" checked>
+            <span class="toggle-track"></span>
+            <span>Spring easing</span>
+          </label>
         </div>
       </section>
 
       <section id="export">
         <h2>Export</h2>
-        <p>Click to copy the current state to your clipboard, then paste into Claude.</p>
+        <p>Tune the values, then bring the result back into Claude with one click.</p>
         <p>
-          <button class="btn btn-primary" type="button" id="copy-json">Copy as JSON</button>
-          <button class="btn" type="button" id="copy-prompt">Copy as prompt</button>
+          <button class="btn btn-primary" type="button" id="copy-prompt">Copy as prompt</button>
+          <button class="btn" type="button" id="copy-json">Copy as JSON</button>
+          <button class="btn" type="button" id="copy-diff">Copy as diff</button>
         </p>
         <details>
           <summary>Live state</summary>
           <pre><code id="state-preview">{}</code></pre>
         </details>
       </section>
+
+      <!--
+        Other playground shapes worth borrowing for one-off editors:
+
+        Config editor:
+          - List of `.toggle` inputs grouped by area
+          - Show dependency warnings inline (".callout-warning")
+          - "Copy diff" button that emits only the changed keys
+
+        Triage / reorder:
+          - Use draggable cards across Now / Next / Later / Cut columns
+          - "Copy as markdown" button that exports the final ordering
+          - Pre-sort with a best-guess so the user only edits the edges
+
+        Side-by-side prompt editor:
+          - Editable prompt left, three sample renders right
+          - Token / char counter
+          - "Copy prompt" button
+      -->
     </main>
   </div>
 
@@ -95,12 +120,15 @@
     (function () {
       const $ = (id) => document.getElementById(id);
 
-      const state = {
+      const initial = {
         duration: Number($("ctl-duration").value),
         easing: $("ctl-easing").value,
         color: $("ctl-color").value,
         label: $("ctl-label").value,
+        spring: $("ctl-spring").checked,
       };
+
+      const state = { ...initial };
 
       function render() {
         $("val-duration").textContent = String(state.duration);
@@ -113,8 +141,9 @@
 
       function bind(id, key, parse = (v) => v) {
         const el = $(id);
-        el.addEventListener("input", () => {
-          state[key] = parse(el.value);
+        const evt = el.type === "checkbox" ? "change" : "input";
+        el.addEventListener(evt, () => {
+          state[key] = el.type === "checkbox" ? el.checked : parse(el.value);
           render();
         });
       }
@@ -123,23 +152,43 @@
       bind("ctl-easing", "easing");
       bind("ctl-color", "color");
       bind("ctl-label", "label");
+      bind("ctl-spring", "spring");
 
-      $("copy-json").addEventListener("click", async () => {
-        await navigator.clipboard.writeText(JSON.stringify(state, null, 2));
-        $("copy-json").textContent = "Copied!";
-        setTimeout(() => ($("copy-json").textContent = "Copy as JSON"), 1500);
+      function copy(button, text) {
+        navigator.clipboard.writeText(text).then(() => {
+          const original = button.textContent;
+          button.textContent = "Copied!";
+          setTimeout(() => (button.textContent = original), 1500);
+        });
+      }
+
+      $("copy-json").addEventListener("click", (e) => {
+        copy(e.currentTarget, JSON.stringify(state, null, 2));
       });
 
-      $("copy-prompt").addEventListener("click", async () => {
+      $("copy-prompt").addEventListener("click", (e) => {
         const prompt =
           "Apply these settings to the checkout button:\n" +
           "- duration: " + state.duration + "ms\n" +
           "- easing: " + state.easing + "\n" +
           "- end color: " + state.color + "\n" +
-          "- label: " + state.label;
-        await navigator.clipboard.writeText(prompt);
-        $("copy-prompt").textContent = "Copied!";
-        setTimeout(() => ($("copy-prompt").textContent = "Copy as prompt"), 1500);
+          "- label: " + state.label + "\n" +
+          "- spring: " + (state.spring ? "on" : "off");
+        copy(e.currentTarget, prompt);
+      });
+
+      $("copy-diff").addEventListener("click", (e) => {
+        const lines = [];
+        for (const k of Object.keys(state)) {
+          if (state[k] !== initial[k]) {
+            lines.push("- " + k + ": " + JSON.stringify(initial[k]));
+            lines.push("+ " + k + ": " + JSON.stringify(state[k]));
+          }
+        }
+        const diff = lines.length
+          ? "# changed keys\n" + lines.join("\n")
+          : "# no changes";
+        copy(e.currentTarget, diff);
       });
 
       render();

@@ -29,19 +29,20 @@ HTML is a richer canvas than markdown for diving into a problem. Start with a br
 
 ## 2. Code Review & PR Understanding
 
-Code is hard to read in markdown. HTML lets you render real diffs with margin annotations, color-coded findings by severity, and inline flowcharts.
+Code is hard to read in markdown. HTML lets you render real diffs with line numbers, color-coded findings by severity, and margin annotations tied to specific lines — closer to a sticky-note review than a comment thread.
 
-**Template:** `templates/spec-or-plan.html`, extended with `<pre class="diff">` blocks and severity-classed `.risk` callouts.
+**Template:** `templates/code-review.html`
 
 **Example prompt:**
 
-> Help me review this PR by creating an HTML artifact that describes it. I'm not familiar with the streaming/backpressure logic so focus on that. Render the actual diff with inline margin annotations, color-code findings by severity, and add a sequence diagram of the request lifecycle.
+> Help me review this PR by creating an HTML artifact that describes it. I'm not familiar with the streaming/backpressure logic so focus on that. Render the actual diff with inline margin annotations, color-code findings by severity (blocking / nit / nice), and add a vertical flow diagram of the request lifecycle.
 
 **Sections to include:**
-- PR summary
-- Architecture diagram (SVG sequence or data flow)
-- Findings table — file, line, severity (`.risk-high` / `.risk-medium`), recommendation
-- Annotated diff snippets in `<pre class="diff">` with `.diff-add` / `.diff-del` spans
+- PR summary with an at-a-glance stat grid (files touched, +/− lines, findings count)
+- Findings table — file, line, severity, recommendation
+- Annotated diff inside `.window-chrome` with `.code-numbered` rows tagged `add` / `del` / `hl`
+- Margin notes (`.margin-note.severity-blocking|nit|nice`) tied to the highlighted lines
+- Optional vertical SVG of the changed flow
 - Test coverage notes
 
 ---
@@ -109,11 +110,29 @@ Sometimes plain text input doesn't capture what you want. Have Claude build a on
 
 ## Picking a template
 
-| If the user wants…                                                  | Template                  |
-| ------------------------------------------------------------------- | ------------------------- |
-| A plan, spec, brainstorm, requirements doc, or PR explainer         | `spec-or-plan.html`       |
-| A research synthesis, status report, or topic explainer             | `report.html`             |
-| An interactive editor with sliders, drag-and-drop, or live preview  | `playground.html`         |
-| A grid of design variants for side-by-side comparison               | `spec-or-plan.html` + `.variant-grid` |
+| If the user wants…                                                  | Template                              |
+| ------------------------------------------------------------------- | ------------------------------------- |
+| A plan, spec, brainstorm, or requirements doc                       | `spec-or-plan.html`                   |
+| A research synthesis, status report, or topic explainer             | `report.html`                         |
+| A PR explainer or code review                                       | `code-review.html`                    |
+| An interactive editor with sliders, toggles, drag-and-drop, or live preview | `playground.html`             |
+| A grid of design variants for side-by-side comparison               | `spec-or-plan.html` + `.compare-grid` |
 
-When in doubt: start with `spec-or-plan.html` — it has the most flexible structure and you can layer in `.variant-grid`, `.controls`, or interactive blocks as needed.
+When in doubt: start with `spec-or-plan.html` — it has the most flexible structure and you can layer in `.compare-grid`, `.stat-grid`, `.controls`, `.bento`, or interactive blocks as needed.
+
+## Layout primitives
+
+The theme ships composable blocks that any template can pull in:
+
+- `.stat-grid` + `.stat-card` — anchor numbers, big serif value in accent color
+- `.bento` — varied-tile grid with one hero
+- `.timeline` — horizontal milestones, stacks vertically on mobile
+- `.checklist` — numbered cards with accent-colored numerals
+- `.compare-grid` + `.compare-card` (`.is-selected`) — side-by-side approach cards with `+ / −` tradeoffs
+- `.tabs` — pill-style tab nav, alternative to the sidebar TOC
+- `.window-chrome` + `.code-numbered` — file-window diff view with severity-tagged rows (`add` / `del` / `hl`)
+- `.code-with-margin` + `.margin-note.severity-{blocking,nit,nice}` — annotated code with side notes
+- `.pull-quote` — pull-quote treatment
+- `.swatch-row` + `.swatch` — color tokens with hex labels
+- `.toggle` — iOS-style switch input for playgrounds
+

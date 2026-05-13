@@ -36,7 +36,7 @@ Inspired by Thariq Shihipar's [The Unreasonable Effectiveness of HTML](https://t
 
 If the user just said "make an HTML file for X", you can move fast:
 
-1. Read `templates/spec-or-plan.html`, `templates/report.html`, or `templates/playground.html` — whichever fits the use case (see `references/use-cases.md` for picking the right one).
+1. Read `templates/spec-or-plan.html`, `templates/report.html`, `templates/code-review.html`, or `templates/playground.html` — whichever fits the use case (see `references/use-cases.md` for picking the right one).
 2. Fill in the content. Keep the embedded `<style>` block from the template — it pulls from `styles/theme.css` and gives you light/dark mode + mobile responsive out of the box.
 3. Write to disk at the path agreed with the user (default: `<cwd>/<descriptive-name>.html`).
 4. Print the absolute path so the user can ⌘-click to open, and offer to run `scripts/open-in-browser.sh <path>`.
@@ -49,9 +49,9 @@ Five canonical use cases — see `references/use-cases.md` for full examples and
 
 - **Spec / Plan / Brainstorm** — long-form document with TOC, sections, tables, optional SVG. Template: `spec-or-plan.html`.
 - **Report / Research / Explainer** — synthesizes a topic with diagrams, callouts, and a "key takeaways" block. Template: `report.html`.
-- **Code review / PR explainer** — diff-style code blocks, severity-colored findings, optional sequence diagram. Template: `spec-or-plan.html` (extend with `<pre class="diff">` blocks — see `references/svg-patterns.md`).
-- **Design exploration / mockup grid** — 2-6 variants laid out side-by-side for comparison. Template: `spec-or-plan.html` with a custom `.variant-grid` CSS block (the theme already provides surface/border tokens).
-- **Playground / throwaway editor** — interactive sliders, drag-and-drop columns, form editors with a copy-to-clipboard export. Template: `playground.html`.
+- **Code review / PR explainer** — line-numbered diff with severity-colored margin annotations and a findings table. Template: `code-review.html`.
+- **Design exploration / mockup grid** — 2–6 variants laid out side-by-side for comparison. Template: `spec-or-plan.html` with the `.compare-grid` block (selected card marked with `is-selected`).
+- **Playground / throwaway editor** — interactive sliders, toggles, drag-and-drop, form editors with copy-as-prompt / copy-as-diff / copy-as-JSON exports. Template: `playground.html`.
 
 ### 2. Decide on file location
 
@@ -92,6 +92,21 @@ Use inline SVG, never images. Three canonical patterns are in `references/svg-pa
 Each pattern uses `class="diagram"`, `currentColor` for stroke/fill, and a `<title>` for accessibility. Strokes follow the dark-mode-aware theme automatically.
 
 **Lay out flows vertically (top-to-bottom), not horizontally.** Horizontal chains with more than 3–4 nodes get cropped on narrow viewports, in side panels, and in PDFs — labels at the right edge get cut off. Use a tall `viewBox` (e.g. `320x640`) with arrows pointing down. Sequence diagrams are the one exception: their actor lanes are inherently horizontal, but keep them to ≤3 lanes.
+
+### 4b. Reach for layout primitives instead of plain prose
+
+The theme ships composable blocks that read faster than a wall of paragraphs. Use them when the content shape matches:
+
+- **`.stat-grid` / `.stat-card`** — 2–4 anchor numbers (SLOs, volumes, deadlines). Big serif value in accent color over a short uppercase label.
+- **`.bento`** — varied-size tiles with one hero + 3–5 supporting. Good for "X kinds of things" overviews, feature inventories, design-system summaries.
+- **`.timeline`** — horizontal milestone bar for roadmaps and phases (≤6 milestones). Stacks vertically on mobile.
+- **`.checklist`** — ordered list with big accent-colored numerals. Use for gotchas, recommendations, and next-step lists where a flat `<ul>` reads too quietly.
+- **`.compare-grid` / `.compare-card`** — 2–4 side-by-side approach cards with `+ / −` tradeoffs. Mark the chosen one with `is-selected`.
+- **`.tabs`** — pill-style tab nav. Use as an alternative to the sidebar TOC when the document splits into a few large parts.
+- **`.window-chrome` + `.code-numbered`** — macOS-style file-window wrap around line-numbered code. Pairs with `.margin-note.severity-{blocking,nit,nice}` to attach review comments beside the code.
+- **`.pull-quote`** — for the one sentence in a report worth setting off as a banner.
+
+These are all composable — drop them inside any `<section>` of any template. They share the same dark-mode-aware tokens, so no per-component theming is needed.
 
 ### 5. Verify
 
@@ -152,7 +167,8 @@ This makes HTML artifacts a strict superset of markdown frontmatter, not a repla
 - `references/skeleton.md` — the canonical document skeleton, frontmatter contract, and anchor ID conventions
 - `references/svg-patterns.md` — data-flow, sequence, and dependency-graph inline SVG patterns
 - `styles/theme.css` — embedded CSS theme (light/dark, mobile-responsive) — copied into every artifact's `<style>` block
-- `templates/spec-or-plan.html` — spec / plan / brainstorm / code review starting template
+- `templates/spec-or-plan.html` — spec / plan / brainstorm starting template
 - `templates/report.html` — report / research / explainer template with key-takeaways callout
-- `templates/playground.html` — interactive playground / throwaway editor template with copy-to-clipboard
+- `templates/code-review.html` — PR explainer with line-numbered diff and severity-colored margin annotations
+- `templates/playground.html` — interactive playground / throwaway editor template with copy-as-prompt / copy-as-diff / copy-as-JSON
 - `scripts/open-in-browser.sh` — open a generated HTML file in the system default browser

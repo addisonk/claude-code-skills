@@ -13,6 +13,9 @@
     <p class="eyebrow">[Report / Explainer / Status update]</p>
     <h1>[Report title]</h1>
     <p class="summary">[A one-paragraph executive summary that someone could read alone and walk away informed.]</p>
+    <p class="summary" style="margin-top:6px; font-family:var(--font-mono); font-size:0.86rem;">
+      Synthesized from <strong>[codebase / git log / Slack / web]</strong> · window: [time window] · sources scanned: [n]
+    </p>
     <div class="pill-row" aria-label="Frontmatter">
       <span class="pill pill-type-feat">type: report</span>
       <span class="pill pill-date">date: YYYY-MM-DD</span>
@@ -49,23 +52,27 @@
 
       <section id="how-it-works">
         <h2>How it works</h2>
-        <p>[The 30-second mental model. End with a diagram if appropriate.]</p>
+        <p>[The 30-second mental model. End with a diagram.]</p>
 
-        <svg class="diagram" viewBox="0 0 640 180" role="img" aria-labelledby="flow-title" xmlns="http://www.w3.org/2000/svg">
+        <!--
+          Vertical flow diagram. Wide horizontal flows get clipped at narrow
+          viewports — see references/svg-patterns.md for the canonical form.
+        -->
+        <svg class="diagram" viewBox="0 0 320 480" role="img" aria-labelledby="flow-title" xmlns="http://www.w3.org/2000/svg">
           <title id="flow-title">[Diagram title]</title>
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
             </marker>
           </defs>
-          <rect x="24" y="58" width="150" height="64" rx="8" fill="none" stroke="currentColor"></rect>
-          <text x="99" y="95" text-anchor="middle">[Step 1]</text>
-          <line x1="184" y1="90" x2="292" y2="90" stroke="currentColor" marker-end="url(#arrow)"></line>
-          <rect x="302" y="58" width="150" height="64" rx="8" fill="none" stroke="currentColor"></rect>
-          <text x="377" y="95" text-anchor="middle">[Step 2]</text>
-          <line x1="462" y1="90" x2="570" y2="90" stroke="currentColor" marker-end="url(#arrow)"></line>
-          <rect x="580" y="58" width="36" height="64" rx="8" fill="none" stroke="currentColor"></rect>
-          <text x="598" y="95" text-anchor="middle">[End]</text>
+          <rect x="60" y="24" width="200" height="64" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="160" y="61" text-anchor="middle">[Step 1]</text>
+          <line x1="160" y1="98" x2="160" y2="186" stroke="currentColor" marker-end="url(#arrow)"></line>
+          <rect x="60" y="196" width="200" height="64" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="160" y="233" text-anchor="middle">[Step 2]</text>
+          <line x1="160" y1="270" x2="160" y2="358" stroke="currentColor" marker-end="url(#arrow)"></line>
+          <rect x="60" y="368" width="200" height="64" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="160" y="405" text-anchor="middle">[Outcome]</text>
         </svg>
       </section>
 
@@ -74,12 +81,31 @@
         <p>[Walk through 2-4 things in detail. Use code blocks and tables freely.]</p>
 
         <h3>[Subsection]</h3>
-        <p>[Prose.]</p>
+        <p>[Prose framing the snippet.]</p>
 
-        <pre><code><span class="token-comment">// Annotated code excerpt</span>
-<span class="token-keyword">function</span> example() {
-  <span class="token-keyword">return</span> <span class="token-string">"hello"</span>;
+        <!--
+          Annotated code with side-margin notes. Wrap the key line(s) in a
+          <span class="line-highlight"> to tie the prose to the highlight.
+        -->
+        <div class="code-with-margin">
+          <pre><code><span class="token-comment">// limiter.ts</span>
+<span class="token-keyword">export function</span> <span class="token-symbol">acquire</span>(key: <span class="token-keyword">string</span>) {
+  <span class="token-keyword">const</span> bucket = buckets.get(key);
+<span class="line-highlight">  <span class="token-keyword">if</span> (bucket.tokens &lt;= 0) <span class="token-keyword">return</span> <span class="token-string">"429"</span>;</span>
+  bucket.tokens -= 1;
+  <span class="token-keyword">return</span> <span class="token-string">"pass"</span>;
 }</code></pre>
+          <div class="code-margin">
+            <div class="margin-note">
+              <span class="severity-label">key line</span>
+              <p style="margin:0;">[Why this line is the hinge of the snippet — one or two sentences.]</p>
+            </div>
+            <div class="margin-note">
+              <span class="severity-label">note</span>
+              <p style="margin:0;">[Adjacent context the reader needs — a constant, an invariant, an upstream guarantee.]</p>
+            </div>
+          </div>
+        </div>
 
         <h3>[Subsection]</h3>
         <div class="table-wrap">
@@ -100,12 +126,15 @@
 
       <section id="gotchas">
         <h2>Gotchas</h2>
-        <div class="callout callout-warning">
-          <strong>Watch out:</strong> [Common pitfall.]
-        </div>
-        <ul>
-          <li>[Other gotcha.]</li>
-        </ul>
+        <!--
+          Use the checklist primitive for gotchas — big numbered cards read
+          faster than a bulleted list and visually telegraph "watch out".
+        -->
+        <ol class="checklist">
+          <li><strong>[Gotcha headline]</strong> — [One-sentence explanation of what bites and why.]</li>
+          <li><strong>[Gotcha headline]</strong> — [Explanation.]</li>
+          <li><strong>[Gotcha headline]</strong> — [Explanation.]</li>
+        </ol>
       </section>
 
       <section id="references">

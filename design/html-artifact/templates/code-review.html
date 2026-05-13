@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>[PR title] — review</title>
+  <style>
+    /* Inline the full contents of ../styles/theme.css here. */
+  </style>
+</head>
+<body>
+  <header class="doc-header">
+    <p class="eyebrow">PR explainer · #[number]</p>
+    <h1>[PR title]</h1>
+    <p class="summary">[One paragraph: what this PR changes, why, and the single thing a reviewer should look at hardest.]</p>
+    <div class="pill-row" aria-label="Frontmatter">
+      <span class="pill pill-type-feat">type: pr-review</span>
+      <span class="pill pill-date">date: YYYY-MM-DD</span>
+      <span class="pill pill-origin">branch: [feature/branch]</span>
+      <span class="pill pill-origin">base: main</span>
+    </div>
+    <script type="application/json" id="review-frontmatter">
+      {
+        "title": "[PR title]",
+        "type": "pr-review",
+        "pr": "[number]",
+        "date": "YYYY-MM-DD",
+        "branch": "[feature/branch]"
+      }
+    </script>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <a href="#summary-stats">At a glance</a>
+      <a href="#findings">Findings</a>
+      <a href="#diffs">Annotated diff</a>
+      <a href="#flow">What changed in the flow</a>
+      <a href="#tests">Tests</a>
+      <a href="#open">Open questions</a>
+    </nav>
+
+    <main>
+      <section id="summary-stats">
+        <h2>At a glance</h2>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <p class="stat-label">files touched</p>
+            <p class="stat-value">7</p>
+            <p class="stat-context">3 prod · 4 test</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">lines</p>
+            <p class="stat-value">+148 / −62</p>
+            <p class="stat-context">net +86</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">findings</p>
+            <p class="stat-value">3</p>
+            <p class="stat-context">1 blocking · 1 nit · 1 nice</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="findings">
+        <h2>Findings</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Severity</th><th>File:line</th><th>Issue</th><th>Suggested fix</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="Severity"><span style="color:var(--danger); font-weight:700;">blocking</span></td>
+                <td data-label="File:line"><code>lib/session.ts:14</code></td>
+                <td data-label="Issue">[What is wrong and why it matters.]</td>
+                <td data-label="Suggested fix">[Concrete change.]</td>
+              </tr>
+              <tr>
+                <td data-label="Severity"><span style="color:var(--warning); font-weight:700;">nit</span></td>
+                <td data-label="File:line"><code>lib/session.ts:19</code></td>
+                <td data-label="Issue">[Style / naming / clarity comment.]</td>
+                <td data-label="Suggested fix">[Concrete change.]</td>
+              </tr>
+              <tr>
+                <td data-label="Severity"><span style="color:var(--success); font-weight:700;">nice</span></td>
+                <td data-label="File:line"><code>lib/session.ts:24</code></td>
+                <td data-label="Issue">[Praise: behavior worth keeping.]</td>
+                <td data-label="Suggested fix">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="diffs">
+        <h2>Annotated diff</h2>
+        <p>[Brief framing: which file, what changed.]</p>
+
+        <!--
+          File-window chrome wraps the line-numbered diff. The .code-numbered
+          block uses a 2-column grid: line numbers, then code rows.
+          Each row carries `add` / `del` / `hl` modifiers.
+        -->
+        <div class="window-chrome">
+          <div class="window-titlebar">
+            <span class="window-dots"><span></span><span></span><span></span></span>
+            <span class="window-title">lib/session.ts</span>
+            <span class="window-meta">−7 +18</span>
+          </div>
+          <div class="window-body" style="padding:0;">
+            <div class="code-numbered">
+              <div class="row"><span class="ln">12</span><span class="code">  const store = new SessionStore();</span></div>
+              <div class="row"><span class="ln">13</span><span class="code">  const ttl = 60 * 60;</span></div>
+              <div class="row hl"><span class="ln">14</span><span class="code">  return store.create({ ttl });</span></div>
+              <div class="row del"><span class="ln">15</span><span class="code">- return wrap(store);</span></div>
+              <div class="row add"><span class="ln">15</span><span class="code">+ return wrapWithMetrics(store);</span></div>
+              <div class="row add"><span class="ln">16</span><span class="code">+ // emits session.created on every call</span></div>
+              <div class="row"><span class="ln">17</span><span class="code">}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!--
+          Side-margin findings tied to the highlighted line(s) above.
+          Severity classes: blocking / nit / nice. Keep notes short.
+        -->
+        <div class="code-margin" style="margin-top:14px;">
+          <div class="margin-note severity-blocking">
+            <span class="severity-label">blocking · line 14</span>
+            <p style="margin:0;">[Why this line is the issue and what failure mode it produces.]</p>
+          </div>
+          <div class="margin-note severity-nit">
+            <span class="severity-label">nit · line 15</span>
+            <p style="margin:0;">[Smaller suggestion — naming, ordering, or clarity.]</p>
+          </div>
+          <div class="margin-note severity-nice">
+            <span class="severity-label">nice · line 16</span>
+            <p style="margin:0;">[Behavior worth calling out positively.]</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="flow">
+        <h2>What changed in the flow</h2>
+        <p>[One sentence. End with a vertical SVG when the change shifts a control or data path.]</p>
+
+        <svg class="diagram" viewBox="0 0 320 360" role="img" aria-labelledby="pr-flow-title" xmlns="http://www.w3.org/2000/svg">
+          <title id="pr-flow-title">Before vs after — session create path</title>
+          <defs>
+            <marker id="pr-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <rect x="60" y="24" width="200" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="160" y="57" text-anchor="middle">request</text>
+          <line x1="160" y1="90" x2="160" y2="146" stroke="currentColor" marker-end="url(#pr-arrow)"></line>
+          <rect x="60" y="156" width="200" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="160" y="189" text-anchor="middle">wrapWithMetrics</text>
+          <line x1="160" y1="222" x2="160" y2="278" stroke="currentColor" marker-end="url(#pr-arrow)"></line>
+          <rect x="60" y="288" width="200" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+          <text x="160" y="321" text-anchor="middle">session.created event</text>
+        </svg>
+      </section>
+
+      <section id="tests">
+        <h2>Tests</h2>
+        <ul>
+          <li><strong>[Test name]</strong> — [What it covers; whether it would have caught the blocking finding.]</li>
+          <li><strong>[Test name]</strong> — [Coverage notes.]</li>
+        </ul>
+        <p>[Missing coverage to flag, if any.]</p>
+      </section>
+
+      <section id="open">
+        <h2>Open questions</h2>
+        <ul>
+          <li>[Anything the author should clarify before merge.]</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <footer class="doc-footer">
+    <p>PR explainer. Attach the rendered file to the PR description for richer review than the default diff view.</p>
+  </footer>
+</body>
+</html>
