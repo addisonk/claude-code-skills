@@ -2,26 +2,28 @@
 
 Three canonical patterns for diagrams. Use inline `<svg>` only — never `<img>`, never CDN-hosted assets. Every diagram uses `class="diagram"` (the theme styles width/height), `currentColor` for strokes and fills (so dark mode just works), and a `<title>` for accessibility.
 
+**Default to vertical layout.** Horizontal flows with more than 3–4 nodes get clipped on narrow viewports, in chat side panels, and when exported to PDF — the right-edge labels and trailing nodes are the first to disappear. Use a tall `viewBox` (roughly `320x640` for a 4-node flow) with arrows pointing down. The only pattern that stays horizontal is the sequence diagram, because actor lanes are inherently side-by-side; cap those at 3 lanes.
+
 ## Data flow
 
-Use for request, data, or artifact movement between systems.
+Use for request, data, or artifact movement between systems. Lay out top-to-bottom.
 
 ```html
-<svg class="diagram" viewBox="0 0 640 180" role="img" aria-labelledby="data-flow-title" xmlns="http://www.w3.org/2000/svg">
+<svg class="diagram" viewBox="0 0 320 480" role="img" aria-labelledby="data-flow-title" xmlns="http://www.w3.org/2000/svg">
   <title id="data-flow-title">Data flow: source to transform to sink</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
     </marker>
   </defs>
-  <rect x="24" y="58" width="150" height="64" rx="8" fill="none" stroke="currentColor"></rect>
-  <text x="99" y="95" text-anchor="middle">Source</text>
-  <line x1="184" y1="90" x2="292" y2="90" stroke="currentColor" marker-end="url(#arrow)"></line>
-  <rect x="302" y="58" width="150" height="64" rx="8" fill="none" stroke="currentColor"></rect>
-  <text x="377" y="95" text-anchor="middle">Transform</text>
-  <line x1="462" y1="90" x2="570" y2="90" stroke="currentColor" marker-end="url(#arrow)"></line>
-  <rect x="580" y="58" width="36" height="64" rx="8" fill="none" stroke="currentColor"></rect>
-  <text x="598" y="95" text-anchor="middle">Sink</text>
+  <rect x="60" y="24" width="200" height="64" rx="8" fill="none" stroke="currentColor"></rect>
+  <text x="160" y="61" text-anchor="middle">Source</text>
+  <line x1="160" y1="98" x2="160" y2="186" stroke="currentColor" marker-end="url(#arrow)"></line>
+  <rect x="60" y="196" width="200" height="64" rx="8" fill="none" stroke="currentColor"></rect>
+  <text x="160" y="233" text-anchor="middle">Transform</text>
+  <line x1="160" y1="270" x2="160" y2="358" stroke="currentColor" marker-end="url(#arrow)"></line>
+  <rect x="60" y="368" width="200" height="64" rx="8" fill="none" stroke="currentColor"></rect>
+  <text x="160" y="405" text-anchor="middle">Sink</text>
 </svg>
 ```
 
@@ -54,28 +56,28 @@ Use for ordered interactions between actors or subsystems.
 
 ## Dependency graph
 
-Use for implementation-unit prerequisites and phase ordering.
+Use for implementation-unit prerequisites and phase ordering. Lay out top-to-bottom; branch siblings sit side-by-side at each level.
 
 ```html
-<svg class="diagram" viewBox="0 0 640 220" role="img" aria-labelledby="dependency-title" xmlns="http://www.w3.org/2000/svg">
+<svg class="diagram" viewBox="0 0 360 480" role="img" aria-labelledby="dependency-title" xmlns="http://www.w3.org/2000/svg">
   <title id="dependency-title">Dependency graph between implementation units</title>
   <defs>
     <marker id="dep-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
     </marker>
   </defs>
-  <rect x="40" y="76" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
-  <text x="100" y="110" text-anchor="middle">U1</text>
-  <rect x="260" y="32" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
-  <text x="320" y="66" text-anchor="middle">U2</text>
-  <rect x="260" y="132" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
-  <text x="320" y="166" text-anchor="middle">U3</text>
-  <rect x="480" y="76" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
-  <text x="540" y="110" text-anchor="middle">U4</text>
-  <line x1="164" y1="94" x2="254" y2="66" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
-  <line x1="164" y1="114" x2="254" y2="154" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
-  <line x1="384" y1="60" x2="474" y2="94" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
-  <line x1="384" y1="160" x2="474" y2="116" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
+  <rect x="120" y="24" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+  <text x="180" y="58" text-anchor="middle">U1</text>
+  <rect x="40" y="200" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+  <text x="100" y="234" text-anchor="middle">U2</text>
+  <rect x="200" y="200" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+  <text x="260" y="234" text-anchor="middle">U3</text>
+  <rect x="120" y="376" width="120" height="56" rx="8" fill="none" stroke="currentColor"></rect>
+  <text x="180" y="410" text-anchor="middle">U4</text>
+  <line x1="160" y1="90" x2="110" y2="190" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
+  <line x1="200" y1="90" x2="250" y2="190" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
+  <line x1="110" y1="266" x2="160" y2="366" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
+  <line x1="250" y1="266" x2="200" y2="366" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
 </svg>
 ```
 
@@ -101,6 +103,7 @@ Not a diagram, but commonly needed for code-review artifacts. The theme provides
 - **Inline only.** No `<img src="...">`, no external SVG references.
 - **`currentColor` everywhere.** Strokes and fills inherit from the page's text color, so dark mode flips automatically without per-SVG overrides.
 - **`viewBox`, not `width`/`height` attributes.** The theme's `.diagram` rule handles responsive sizing.
+- **Vertical, not horizontal.** Flows go top-to-bottom with arrows pointing down. Wide diagrams overflow narrow viewports and side panels and chop off the rightmost nodes and labels. Tall diagrams scroll naturally.
 - **One `<title>` per SVG.** Either `role="img"` + `<title>` (informative) or `aria-hidden="true"` (decorative).
 - **Don't draw what a `<table>` could show better.** SVG is for spatial relationships and flow; tabular data belongs in `<table>`.
 - **Don't draw what real HTML can show.** A 3-step process is fine as a numbered `<ol>` — save SVG for when arrows, branching, or 2D layout actually help.

@@ -91,6 +91,8 @@ Use inline SVG, never images. Three canonical patterns are in `references/svg-pa
 
 Each pattern uses `class="diagram"`, `currentColor` for stroke/fill, and a `<title>` for accessibility. Strokes follow the dark-mode-aware theme automatically.
 
+**Lay out flows vertically (top-to-bottom), not horizontally.** Horizontal chains with more than 3–4 nodes get cropped on narrow viewports, in side panels, and in PDFs — labels at the right edge get cut off. Use a tall `viewBox` (e.g. `320x640`) with arrows pointing down. Sequence diagrams are the one exception: their actor lanes are inherently horizontal, but keep them to ≤3 lanes.
+
 ### 5. Verify
 
 Open the file in a browser. Required checks (the `agent-browser` skill can automate these):
