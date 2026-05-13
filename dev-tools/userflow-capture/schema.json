@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "flowcap userflows.json",
+  "title": "userflow-capture userflows.js",
   "type": "object",
   "required": ["project", "lanes", "nodes", "flows"],
   "properties": {
@@ -20,7 +20,7 @@
     },
     "lanes": {
       "type": "array",
-      "description": "Columns of the swimlane diagram, left to right. Order matters — flows usually read left-to-right.",
+      "description": "Columns of the swimlane diagram, left to right. Order matters — userflows usually read left-to-right.",
       "items": {
         "type": "object",
         "required": ["id", "label"],
@@ -47,13 +47,13 @@
     },
     "flows": {
       "type": "array",
-      "description": "Named flows. Selecting one in the UI highlights its nodes and draws numbered edges.",
+      "description": "Named userflows. Each gets its own section in the rendered page.",
       "items": {
         "type": "object",
         "required": ["id", "title", "steps"],
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
-          "title": { "type": "string", "description": "Imperative or short noun phrase. Used in the flow picker." },
+          "title": { "type": "string", "description": "Imperative or short noun phrase. Used in the sidebar nav and as the userflow's section heading." },
           "description": { "type": "string", "description": "One-line explanation shown under the title." },
           "steps": {
             "type": "array",

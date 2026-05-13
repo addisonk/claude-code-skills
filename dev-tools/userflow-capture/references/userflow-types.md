@@ -1,14 +1,14 @@
 # Userflow types
 
-A reference taxonomy of common user-journey types, grouped into six categories: **New User Experience**, **Account Management**, **Commerce & Finance**, **Social**, **Content**, and **Misc**. Use these when naming flows so captures stay consistent across projects and don't drift into custom one-off names where a standard fits.
+A reference taxonomy of common user-journey types, grouped into six categories: **New User Experience**, **Account Management**, **Commerce & Finance**, **Social**, **Content**, and **Misc**. Use these when naming userflows so captures stay consistent across projects and don't drift into custom one-off names where a standard fits.
 
 ## How to use this list
 
-- **Match first, customize only if nothing fits.** Before inventing a flow title like "Sign up and finish onboarding then receive the first push notification", check this list. If the journey is recognizably one of these, use the standard name (e.g. "Onboarding" or "Creating Account").
-- **A flow may correspond to multiple categories.** A signup-then-onboarding flow could pick either "Creating Account" or "Onboarding" — go with whichever describes the *user's primary goal* in that flow, not the longest list of actions.
-- **Product-specific specificity is fine in the description, not the name.** Keep the flow `title` close to the standard taxonomy; put the product-specific detail in the flow `description` and step descriptions.
-- **Custom names are allowed when nothing on this list fits** — but treat that as the exception, not the default. If you find yourself naming a flow with three "and"s in it, you probably need to split it or pick a standard name.
-- **`flow.id`** stays kebab-case (`creating-account`, `editing-profile`, `purchasing-ordering`). The taxonomy below is the human-readable form for `flow.title`.
+- **Match first, customize only if nothing fits.** Before inventing a userflow title like "Sign up and finish onboarding then receive the first push notification", check this list. If the journey is recognizably one of these, use the standard name (e.g. "Onboarding" or "Creating Account").
+- **A userflow may correspond to multiple categories.** A signup-then-onboarding userflow could pick either "Creating Account" or "Onboarding" — go with whichever describes the *user's primary goal* in that userflow, not the longest list of actions.
+- **Product-specific specificity is fine in the description, not the name.** Keep the userflow's `title` field close to the standard taxonomy; put product-specific detail in its `description` field and the step descriptions.
+- **Custom names are allowed when nothing on this list fits** — but treat that as the exception, not the default. If you find yourself naming a userflow with three "and"s in it, you probably need to split it or pick a standard name.
+- **The userflow's `id` field** stays kebab-case (`creating-account`, `editing-profile`, `purchasing-ordering`). The taxonomy below is the human-readable form for the `title` field.
 
 ## New User Experience
 
@@ -107,4 +107,4 @@ A reference taxonomy of common user-journey types, grouped into six categories: 
 | Picks a different language in settings | "Toggle the language preference" | "Changing Language" |
 | Connects a Google Calendar to the app | "Link Google account for calendar sync" | "Connecting & Linking" |
 
-If the journey legitimately doesn't appear here (e.g., "First-time NFC pairing of a hardware device"), a custom name is fine — but write it in the same imperative-gerund voice as the list above: `Pairing Hardware`, not `First-time NFC pairing flow on iOS`.
+If the journey legitimately doesn't appear here (e.g., "First-time NFC pairing of a hardware device"), a custom name is fine — but write it in the same imperative-gerund voice as the list above: `Pairing Hardware`, not `First-time NFC pairing userflow on iOS`.

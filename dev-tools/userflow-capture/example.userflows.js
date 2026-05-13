@@ -3,7 +3,7 @@
 // every step is something a real user does, sees, taps, or receives — not a
 // backend trace. Code pointers (if any) are footnotes after an em dash.
 //
-// Flow titles use the standard taxonomy from references/userflow-types.md
+// Userflow titles use the standard taxonomy from references/userflow-types.md
 // (Onboarding, Logging & Tracking, Editing & Updating, …). Custom names are
 // allowed when nothing fits — "Changing Reminder" here — but stay in the
 // same imperative-gerund voice.
@@ -47,7 +47,7 @@ window.USERFLOWS = {
         { "from": "signup",        "to": "verify",        "label": "Submit email + password",
           "description": "User submits credentials; a 6-digit verification code is emailed to them." },
         { "from": "verify",        "to": "welcome",       "label": "Enter 6-digit code",
-          "description": "User types the code from email and is dropped into the onboarding flow." },
+          "description": "User types the code from email and is dropped into onboarding." },
         { "from": "welcome",       "to": "pick-reminder", "label": "Type first name, tap 'Next'",
           "description": "User enters their first name (used in the daily greeting) and continues." },
         { "from": "pick-reminder", "to": "today",         "label": "Confirm reminder time",

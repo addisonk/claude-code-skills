@@ -48,14 +48,14 @@
   header.page h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
   header.page p { margin: 0; color: var(--muted); max-width: 80ch; }
 
-  /* Flow section */
+  /* Userflow section */
   section.flow { margin-top: 56px; scroll-margin-top: 20px; }
   section.flow:first-of-type { margin-top: 0; }
   section.flow > header { margin-bottom: 18px; }
   section.flow > header h2 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.005em; }
   section.flow > header p { margin: 0; color: var(--muted); max-width: 80ch; }
 
-  /* Diagram (per flow) — vertical CSS grid, tiers = rows, branches = columns */
+  /* Diagram (per userflow) — vertical CSS grid, tiers = rows, branches = columns */
   .diagram { position: relative; border: 1px solid var(--line); border-radius: 12px;
     background: linear-gradient(180deg, #0c0c0c, #080808); padding: 36px 28px;
     overflow: visible; }
@@ -96,7 +96,7 @@
 <body>
 <div class="app">
   <aside class="toc">
-    <h3>Flows</h3>
+    <h3>Userflows</h3>
     <ul id="toc"></ul>
   </aside>
   <main class="content">
@@ -109,7 +109,7 @@
 </div>
 
 <!--
-  Flow data is loaded from the sibling `userflows.js`, which must define
+  Userflow data is loaded from the sibling `userflows.js`, which must define
   window.USERFLOWS. Keep the two files side-by-side. See schema.json in
   the userflow-capture skill for the data shape.
 -->
@@ -127,8 +127,8 @@
     return;
   }
   if (!data.flows?.length) {
-    $("title").textContent = "No flows defined";
-    $("subtitle").textContent = "userflows.js loaded but has no flows.";
+    $("title").textContent = "No userflows defined";
+    $("subtitle").textContent = "userflows.js loaded but has no userflows.";
     return;
   }
 
@@ -145,13 +145,13 @@
     const li = document.createElement("li");
     const a = document.createElement("a");
     a.href = `#flow-${f.id ?? i}`;
-    a.textContent = f.title || `Flow ${i + 1}`;
+    a.textContent = f.title || `Userflow ${i + 1}`;
     a.dataset.target = `flow-${f.id ?? i}`;
     li.appendChild(a);
     tocEl.appendChild(li);
   });
 
-  // Render each flow as its own section
+  // Render each userflow as its own section
   const flowsEl = $("flows");
   data.flows.forEach((flow, i) => {
     const section = document.createElement("section");
@@ -161,7 +161,7 @@
     // Header
     const header = document.createElement("header");
     const h2 = document.createElement("h2");
-    h2.textContent = flow.title || `Flow ${i + 1}`;
+    h2.textContent = flow.title || `Userflow ${i + 1}`;
     header.appendChild(h2);
     if (flow.description) {
       const p = document.createElement("p");
@@ -267,7 +267,7 @@
     section._flow = { flow, grid, svg, used, tier, col };
   });
 
-  // Render arrows for every flow (after layout settles)
+  // Render arrows for every userflow (after layout settles)
   function renderAllArrows() {
     document.querySelectorAll("section.flow").forEach((section) => {
       const ctx = section._flow;
@@ -354,9 +354,9 @@
   });
 
   // Scroll spy: highlight the TOC entry for the section currently in view.
-  // Default to the first flow on load. Track which flows are currently in the
-  // trigger zone; if none are, fall back to the last flow whose top has scrolled
-  // above the zone (i.e., what the user is reading past) — or the first flow if
+  // Default to the first userflow on load. Track which userflows are currently in the
+  // trigger zone; if none are, fall back to the last userflow whose top has scrolled
+  // above the zone (i.e., what the user is reading past) — or the first userflow if
   // we're still above all of them.
   const tocLinks = new Map();
   document.querySelectorAll("aside.toc a").forEach((a) => {
