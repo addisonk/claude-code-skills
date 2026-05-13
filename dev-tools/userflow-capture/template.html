@@ -40,14 +40,14 @@
   section.flow > header h2 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.005em; }
   section.flow > header p { margin: 0; color: var(--muted); max-width: 80ch; }
 
-  /* Diagram (per flow) */
+  /* Diagram (per flow) — vertical CSS grid, tiers = rows, branches = columns */
   .diagram { position: relative; border: 1px solid var(--line); border-radius: 12px;
-    background: linear-gradient(180deg, #0c0c0c, #080808); padding: 32px 28px 110px;
+    background: linear-gradient(180deg, #0c0c0c, #080808); padding: 36px 28px;
     overflow: visible; }
-  .nodes { position: relative; display: flex; flex-wrap: wrap; gap: 56px 64px;
-    align-items: flex-start; z-index: 2; }
+  .grid { position: relative; display: grid; gap: 56px 80px; justify-content: center;
+    z-index: 2; }
   .node { background: #0e0e0e; border: 1px solid var(--dim); border-radius: 8px;
-    padding: 12px 14px; min-width: 140px; max-width: 220px; color: var(--text);
+    padding: 12px 14px; min-width: 180px; max-width: 240px; color: var(--text);
     box-shadow: 0 1px 0 rgba(255,255,255,0.02); position: relative; }
   .node .title { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px;
     color: #e8e8e8; line-height: 1.3; }
@@ -64,7 +64,7 @@
   .edges .badge text { fill: #1a1300; font: 600 10px ui-sans-serif, system-ui;
     text-anchor: middle; dominant-baseline: central; }
   .edges .arrow-label { fill: var(--text); font: 500 11px ui-sans-serif, system-ui;
-    text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 4; stroke-linejoin: round; }
+    paint-order: stroke; stroke: var(--bg); stroke-width: 4; stroke-linejoin: round; }
 
   /* Step list below diagram */
   ol.steps { list-style: none; padding: 0; margin: 18px 0 0;
@@ -153,32 +153,51 @@
     }
     section.appendChild(header);
 
-    // Diagram
+    // Diagram (CSS grid: rows = tiers, columns = branches)
     const diagram = document.createElement("div");
     diagram.className = "diagram";
 
-    const nodesContainer = document.createElement("div");
-    nodesContainer.className = "nodes";
-    diagram.appendChild(nodesContainer);
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    diagram.appendChild(grid);
 
-    // Collect unique nodes used in this flow, in encounter order
-    const used = new Map(); // id → node element
+    // Compute tier (row) and col for each node.
+    // tier = max(source-tier) + 1, walking steps in order so back-edges keep their
+    // original lower tier. col: each tier has its own column counter — the first
+    // node placed in a tier goes to col 0 (main spine), subsequent (branch
+    // targets sharing the tier) get col 1, 2, ...
+    const tier = new Map();
+    const col = new Map();
+    const tierNextCol = new Map();
+    const used = new Map();
     const order = [];
+
+    function place(id, t) {
+      if (used.has(id)) return;
+      tier.set(id, t);
+      const c = tierNextCol.get(t) || 0;
+      col.set(id, c);
+      tierNextCol.set(t, c + 1);
+      order.push(id);
+      used.set(id, null);
+    }
+
     (flow.steps || []).forEach((s) => {
-      [s.from, s.to].forEach((id) => {
-        if (id && !used.has(id)) {
-          order.push(id);
-          used.set(id, null);
-        }
-      });
+      if (!used.has(s.from)) place(s.from, 0);
+      if (!used.has(s.to)) {
+        const sourceTier = tier.get(s.from) ?? 0;
+        place(s.to, sourceTier + 1);
+      }
     });
 
-    // Render node cards
+    // Render node cards with explicit grid placement
     order.forEach((id) => {
       const node = nodeById.get(id);
       const el = document.createElement("div");
       el.className = "node";
       el.dataset.id = id;
+      el.style.gridRow = String(tier.get(id) + 1);
+      el.style.gridColumn = String(col.get(id) + 1);
       const lane = node?.lane ? laneById.get(node.lane) : null;
       if (lane?.color) {
         el.style.setProperty("--cat", lane.color);
@@ -187,7 +206,7 @@
       const title = node?.title ?? id;
       const sub = node?.subtitle;
       el.innerHTML = `<div class="title">${escapeHtml(title)}</div>${sub ? `<div class="sub">${escapeHtml(sub)}</div>` : ""}`;
-      nodesContainer.appendChild(el);
+      grid.appendChild(el);
       used.set(id, el);
     });
 
@@ -221,7 +240,7 @@
     flowsEl.appendChild(section);
 
     // Stash refs for arrow rendering
-    section._flow = { flow, nodesContainer, svg, used };
+    section._flow = { flow, grid, svg, used, tier, col };
   });
 
   // Render arrows for every flow (after layout settles)
@@ -233,7 +252,7 @@
     });
   }
 
-  function drawArrows({ flow, nodesContainer, svg, used }) {
+  function drawArrows({ flow, grid, svg, used, tier, col }) {
     svg.innerHTML = "";
     const containerRect = svg.getBoundingClientRect();
 
@@ -249,46 +268,49 @@
       const bx = b.left - containerRect.left;
       const by = b.top - containerRect.top;
 
-      const fromCenter = { x: ax + a.width / 2, y: ay + a.height / 2 };
-      const toCenter   = { x: bx + b.width / 2, y: by + b.height / 2 };
+      const tA = tier.get(s.from), cA = col.get(s.from);
+      const tB = tier.get(s.to),   cB = col.get(s.to);
 
-      // Decide route: same row + forward → horizontal above; same row + backward → bow down
-      // below (so the curve and label clear any intermediate nodes); different rows → vertical.
-      const sameRow = Math.abs(fromCenter.y - toCenter.y) < Math.max(a.height, b.height) / 2;
-      const goingBackward = sameRow && toCenter.x < fromCenter.x;
-      let sx, sy, tx, ty, c1x, c1y, c2x, c2y, labelOffset;
-      if (sameRow && !goingBackward) {
-        // Forward in-row: connect inner sides, gentle horizontal bezier, label above
-        sx = ax + a.width;
-        sy = fromCenter.y;
-        tx = bx;
-        ty = toCenter.y;
-        const cx = Math.max(40, (tx - sx) * 0.4);
-        c1x = sx + cx; c1y = sy;
-        c2x = tx - cx; c2y = ty;
-        labelOffset = -18;
-      } else if (goingBackward) {
-        // Backward in-row: leave bottom of source, enter bottom of target, big downward bow,
-        // label below the curve. Keeps the badge + label clear of intermediate nodes.
-        sx = fromCenter.x;
-        sy = ay + a.height;
-        tx = toCenter.x;
-        ty = by + b.height;
-        const drop = Math.max(70, Math.abs(sx - tx) * 0.25);
-        c1x = sx; c1y = sy + drop;
-        c2x = tx; c2y = ty + drop;
-        labelOffset = +20;
+      // Route by grid relationship:
+      //   forward + same col   → vertical down arrow (the main spine)
+      //   forward + diff col   → diagonal: right/left side of source → top of target
+      //   backward (tB <= tA)  → elbow around the right side back up
+      let sx, sy, tx, ty, c1x, c1y, c2x, c2y;
+      let labelOffsetX = 12, labelOffsetY = 0;
+
+      const forward = tB > tA;
+      const sameCol = cA === cB;
+
+      if (forward && sameCol) {
+        // Vertical: bottom-center → top-center
+        sx = ax + a.width / 2; sy = ay + a.height;
+        tx = bx + b.width / 2; ty = by;
+        const cy = Math.max(20, (ty - sy) * 0.4);
+        c1x = sx; c1y = sy + cy;
+        c2x = tx; c2y = ty - cy;
+        labelOffsetX = 14; labelOffsetY = 0;     // label to the right of the arrow midpoint
+      } else if (forward && !sameCol) {
+        // Diagonal: leave from the side of source closest to target, enter top of target
+        const goingRight = bx + b.width / 2 > ax + a.width / 2;
+        sx = goingRight ? ax + a.width : ax;
+        sy = ay + a.height / 2;
+        tx = bx + b.width / 2;
+        ty = by;
+        const cx = Math.max(30, Math.abs(tx - sx) * 0.4);
+        const cy = Math.max(30, (ty - sy) * 0.4);
+        c1x = sx + (goingRight ? cx : -cx); c1y = sy;
+        c2x = tx; c2y = ty - cy;
+        labelOffsetX = 0; labelOffsetY = -14;
       } else {
-        // Cross-row: vertical attach
-        const goingDown = toCenter.y > fromCenter.y;
-        sx = fromCenter.x;
-        sy = goingDown ? ay + a.height : ay;
-        tx = toCenter.x;
-        ty = goingDown ? by : by + b.height;
-        const cy = Math.max(40, Math.abs(ty - sy) * 0.4);
-        c1x = sx; c1y = sy + Math.sign(ty - sy || 1) * cy;
-        c2x = tx; c2y = ty - Math.sign(ty - sy || 1) * cy;
-        labelOffset = -18;
+        // Backward: elbow around the right side of the diagram, source-right → target-right
+        sx = ax + a.width;
+        sy = ay + a.height / 2;
+        tx = bx + b.width;
+        ty = by + b.height / 2;
+        const offset = 70;
+        c1x = sx + offset; c1y = sy;
+        c2x = tx + offset; c2y = ty;
+        labelOffsetX = 16; labelOffsetY = 0;
       }
 
       const path = document.createElementNS(SVG, "path");
@@ -311,12 +333,17 @@
       g.appendChild(c); g.appendChild(num);
       svg.appendChild(g);
 
-      // Arrow label (offset above or below based on route)
+      // Arrow label (positioning depends on arrow direction)
       if (s.label) {
         const lab = document.createElementNS(SVG, "text");
         lab.setAttribute("class", "arrow-label");
-        lab.setAttribute("x", mx);
-        lab.setAttribute("y", my + labelOffset);
+        // For vertical/elbow arrows: label sits to the right of the badge, baseline-centered.
+        // For diagonal arrows: label sits above midpoint, horizontally centered.
+        const sideways = labelOffsetX !== 0;
+        lab.setAttribute("x", mx + labelOffsetX + (sideways ? 14 : 0));
+        lab.setAttribute("y", my + labelOffsetY);
+        lab.style.textAnchor = sideways ? "start" : "middle";
+        lab.style.dominantBaseline = sideways ? "middle" : "auto";
         lab.textContent = s.label;
         svg.appendChild(lab);
       }
