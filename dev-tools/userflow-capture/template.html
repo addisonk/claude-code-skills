@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Architecture & Flows</title>
+<title>Userflows</title>
 <style>
   :root {
     --bg: #0a0a0a;
@@ -17,96 +17,80 @@
     --accent-glow: rgba(245,179,43,0.35);
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text);
-    font: 13px/1.45 ui-sans-serif, -apple-system, "SF Pro Text", Inter, system-ui, sans-serif; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 ui-sans-serif, -apple-system, "SF Pro Text", Inter, system-ui, sans-serif; }
   code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
 
-  .app { display: grid; grid-template-columns: 1fr 340px; gap: 24px; padding: 28px; min-height: 100vh; }
-  @media (max-width: 1100px) { .app { grid-template-columns: 1fr; } }
+  .app { max-width: 1400px; margin: 0 auto; padding: 40px 32px 80px; }
 
   /* Header */
-  header h1 { font-size: 22px; margin: 0 0 6px; letter-spacing: -0.01em; }
-  header p { margin: 0 0 14px; color: var(--muted); max-width: 80ch; }
-  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
-  .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  header.page { margin-bottom: 40px; }
+  header.page h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  header.page p { margin: 0 0 18px; color: var(--muted); max-width: 80ch; }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .toc a { font-size: 12px; color: var(--muted); text-decoration: none;
+    padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px;
+    transition: color .15s, border-color .15s, background .15s; }
+  .toc a:hover { color: var(--text); border-color: var(--dim); background: var(--panel); }
 
-  /* Diagram */
+  /* Flow section */
+  section.flow { margin-top: 56px; scroll-margin-top: 20px; }
+  section.flow:first-of-type { margin-top: 0; }
+  section.flow > header { margin-bottom: 18px; }
+  section.flow > header h2 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.005em; }
+  section.flow > header p { margin: 0; color: var(--muted); max-width: 80ch; }
+
+  /* Diagram (per flow) */
   .diagram { position: relative; border: 1px solid var(--line); border-radius: 12px;
-    background: linear-gradient(180deg, #0c0c0c, #080808); padding: 18px; min-height: 540px; }
-  .lanes { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr);
-    gap: 14px; align-items: start; z-index: 2; }
-  .lane h3 { font-size: 11px; letter-spacing: 0.12em; color: var(--muted); font-weight: 600;
-    margin: 0 0 12px; text-transform: uppercase; }
-  .node { background: #0e0e0e; border: 1px solid var(--dim); border-radius: 6px; padding: 10px 11px;
-    margin-bottom: 12px; color: var(--muted); transition: border-color .15s, color .15s, background .15s, box-shadow .15s; }
+    background: linear-gradient(180deg, #0c0c0c, #080808); padding: 32px 28px 110px;
+    overflow: visible; }
+  .nodes { position: relative; display: flex; flex-wrap: wrap; gap: 56px 64px;
+    align-items: flex-start; z-index: 2; }
+  .node { background: #0e0e0e; border: 1px solid var(--dim); border-radius: 8px;
+    padding: 12px 14px; min-width: 140px; max-width: 220px; color: var(--text);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.02); position: relative; }
   .node .title { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px;
-    color: #8a8a8a; line-height: 1.3; }
-  .node .sub { font-size: 11px; color: #4a4a4a; margin-top: 3px; }
-  .node.active { border-color: #ffffff; background: #161616; color: var(--text); }
-  .node.active .title { color: #ffffff; }
-  .node.active .sub { color: #b0b0b0; }
-  .node[data-cat]::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 2px;
-    margin-right: 6px; vertical-align: middle; background: var(--cat, #555); }
+    color: #e8e8e8; line-height: 1.3; }
+  .node .sub { font-size: 11px; color: #7a7a7a; margin-top: 4px; }
+  .node[data-cat]::before { content: ""; display: inline-block; width: 6px; height: 6px;
+    border-radius: 2px; margin-right: 6px; vertical-align: middle; background: var(--cat, #555); }
 
-  /* SVG overlay for edges + step badges */
-  .edges { position: absolute; inset: 18px; width: calc(100% - 36px); height: calc(100% - 36px);
+  /* SVG overlay for arrows */
+  .edges { position: absolute; inset: 0; width: 100%; height: 100%;
     pointer-events: none; z-index: 3; overflow: visible; }
-  .edges path { fill: none; stroke: var(--accent); stroke-width: 1.5; filter: drop-shadow(0 0 4px var(--accent-glow)); }
+  .edges path { fill: none; stroke: var(--accent); stroke-width: 1.5;
+    filter: drop-shadow(0 0 4px var(--accent-glow)); }
   .edges .badge circle { fill: var(--accent); stroke: #1a1300; stroke-width: 1; }
-  .edges .badge text { fill: #1a1300; font: 600 10px ui-sans-serif, system-ui; text-anchor: middle; dominant-baseline: central; }
+  .edges .badge text { fill: #1a1300; font: 600 10px ui-sans-serif, system-ui;
+    text-anchor: middle; dominant-baseline: central; }
+  .edges .arrow-label { fill: var(--text); font: 500 11px ui-sans-serif, system-ui;
+    text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 4; stroke-linejoin: round; }
 
-  /* Sidebar */
-  aside { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-  aside section { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 14px; }
-  aside h2 { font-size: 11px; letter-spacing: 0.14em; color: var(--muted); font-weight: 600;
-    margin: 0 0 12px; text-transform: uppercase; }
-  .flow { padding: 10px 12px; border: 1px solid transparent; border-radius: 8px; cursor: pointer;
-    margin-bottom: 6px; transition: background .15s, border-color .15s; }
-  .flow:hover { background: #161616; }
-  .flow .flow-title { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; color: var(--text); }
-  .flow .flow-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
-  .flow.active { border-color: var(--accent); background: rgba(245,179,43,0.06); }
-  .flow.active .flow-title { color: var(--accent); }
-  .clear { margin-top: 8px; background: transparent; border: 1px dashed var(--line-2); color: var(--muted);
-    padding: 8px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; width: 100%; }
-  .clear:hover { color: var(--text); border-color: #444; }
+  /* Step list below diagram */
+  ol.steps { list-style: none; padding: 0; margin: 18px 0 0;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+  ol.steps li { display: grid; grid-template-columns: 28px 1fr; gap: 12px;
+    padding: 12px 16px; border-top: 1px solid var(--line); align-items: start; }
+  ol.steps li:first-child { border-top: 0; }
+  ol.steps .num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #1a1300; display: flex; align-items: center; justify-content: center;
+    font: 600 11px ui-sans-serif, system-ui; margin-top: 2px; }
+  ol.steps .step-title { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; color: var(--text); }
+  ol.steps .step-title .label { color: var(--accent); font-weight: 500; margin-left: 8px; }
+  ol.steps .step-desc { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-  .steps .step { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 10px 0;
-    border-top: 1px solid var(--line); }
-  .steps .step:first-child { border-top: 0; }
-  .step .num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #1a1300;
-    display: flex; align-items: center; justify-content: center; font: 600 11px ui-sans-serif, system-ui; }
-  .step .title { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; color: var(--text); }
-  .step .body { font-size: 12px; color: var(--muted); margin-top: 3px; }
-
-  .empty { color: var(--muted); font-size: 12px; padding: 8px 0; }
+  .error { padding: 24px; border: 1px solid var(--line); border-radius: 12px;
+    background: var(--panel); color: var(--muted); }
 </style>
 </head>
 <body>
 <div class="app">
-  <main>
-    <header>
-      <h1 id="title">Loading…</h1>
-      <p id="subtitle"></p>
-      <div class="legend" id="legend"></div>
-    </header>
-    <div class="diagram">
-      <div class="lanes" id="lanes"></div>
-      <svg class="edges" id="edges" xmlns="http://www.w3.org/2000/svg"></svg>
-    </div>
-  </main>
-  <aside>
-    <section>
-      <h2>Flows</h2>
-      <div id="flows"></div>
-      <button class="clear" id="clear">Clear selection</button>
-    </section>
-    <section>
-      <h2>Steps</h2>
-      <div class="steps" id="steps"><div class="empty">Pick a flow to see its steps.</div></div>
-    </section>
-  </aside>
+  <header class="page">
+    <h1 id="title">Loading…</h1>
+    <p id="subtitle"></p>
+    <nav class="toc" id="toc"></nav>
+  </header>
+  <main id="flows"></main>
 </div>
 
 <!--
@@ -127,161 +111,235 @@
     $("subtitle").textContent = "Make sure userflows.js sits next to this HTML file and defines window.USERFLOWS.";
     return;
   }
-  if (!data.lanes?.length || !data.flows?.length) {
-    $("title").textContent = "No flow data";
-    $("subtitle").textContent = "userflows.js loaded but has no lanes/flows.";
+  if (!data.flows?.length) {
+    $("title").textContent = "No flows defined";
+    $("subtitle").textContent = "userflows.js loaded but has no flows.";
     return;
   }
 
   // Header
-  $("title").textContent = data.project?.name ? `${data.project.name} — Architecture & Flows` : "Architecture & Flows";
+  $("title").textContent = data.project?.name ? `${data.project.name} — Userflows` : "Userflows";
   $("subtitle").textContent = data.project?.description ?? "";
 
-  // Legend
-  const legend = $("legend");
-  (data.lanes || []).forEach((l) => {
-    if (!l.color) return;
-    const el = document.createElement("span");
-    el.innerHTML = `<i style="background:${l.color}"></i>${l.label || l.id}`;
-    legend.appendChild(el);
+  // Lookup tables
+  const nodeById = new Map((data.nodes || []).map((n) => [n.id, n]));
+  const laneById = new Map((data.lanes || []).map((l) => [l.id, l]));
+
+  // TOC
+  const tocEl = $("toc");
+  data.flows.forEach((f, i) => {
+    const a = document.createElement("a");
+    a.href = `#flow-${f.id ?? i}`;
+    a.textContent = f.title || `Flow ${i + 1}`;
+    tocEl.appendChild(a);
   });
 
-  // Lanes + nodes
-  const lanesEl = $("lanes");
-  const laneById = new Map();
-  (data.lanes || []).forEach((lane) => {
-    const col = document.createElement("div");
-    col.className = "lane";
-    col.dataset.lane = lane.id;
-    col.innerHTML = `<h3>${lane.label || lane.id}</h3>`;
-    lanesEl.appendChild(col);
-    laneById.set(lane.id, { lane, col });
-  });
-
-  const nodeById = new Map();
-  (data.nodes || []).forEach((n) => {
-    const target = laneById.get(n.lane);
-    if (!target) return;
-    const el = document.createElement("div");
-    el.className = "node";
-    el.dataset.id = n.id;
-    const color = target.lane.color || "#555";
-    el.style.setProperty("--cat", color);
-    el.dataset.cat = "1";
-    el.innerHTML = `<div class="title">${n.title}</div>${n.subtitle ? `<div class="sub">${n.subtitle}</div>` : ""}`;
-    target.col.appendChild(el);
-    nodeById.set(n.id, el);
-  });
-
-  // Flows list
+  // Render each flow as its own section
   const flowsEl = $("flows");
-  (data.flows || []).forEach((f, i) => {
-    const el = document.createElement("div");
-    el.className = "flow";
-    el.dataset.id = f.id || String(i);
-    el.innerHTML = `<div class="flow-title">${f.title}</div>${f.description ? `<div class="flow-desc">${f.description}</div>` : ""}`;
-    el.addEventListener("click", () => selectFlow(f.id || String(i)));
-    flowsEl.appendChild(el);
-  });
+  data.flows.forEach((flow, i) => {
+    const section = document.createElement("section");
+    section.className = "flow";
+    section.id = `flow-${flow.id ?? i}`;
 
-  $("clear").addEventListener("click", () => selectFlow(null));
+    // Header
+    const header = document.createElement("header");
+    const h2 = document.createElement("h2");
+    h2.textContent = flow.title || `Flow ${i + 1}`;
+    header.appendChild(h2);
+    if (flow.description) {
+      const p = document.createElement("p");
+      p.textContent = flow.description;
+      header.appendChild(p);
+    }
+    section.appendChild(header);
 
-  // Edge rendering
-  function clearEdges() {
-    $("edges").innerHTML = "";
-    nodeById.forEach((el) => el.classList.remove("active"));
-    document.querySelectorAll(".flow").forEach((el) => el.classList.remove("active"));
-  }
+    // Diagram
+    const diagram = document.createElement("div");
+    diagram.className = "diagram";
 
-  function rectInDiagram(el, container) {
-    const a = el.getBoundingClientRect();
-    const b = container.getBoundingClientRect();
-    return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height };
-  }
+    const nodesContainer = document.createElement("div");
+    nodesContainer.className = "nodes";
+    diagram.appendChild(nodesContainer);
 
-  function drawEdge(svg, from, to, n) {
-    const container = svg;
-    const a = rectInDiagram(from, container);
-    const b = rectInDiagram(to, container);
-    const fromRight = a.x + a.w >= b.x;       // b is to the left of a → loop back
-    const sx = fromRight ? a.x : a.x + a.w;
-    const sy = a.y + a.h / 2;
-    const tx = fromRight ? b.x + b.w : b.x;
-    const ty = b.y + b.h / 2;
-    const dx = Math.abs(tx - sx);
-    const cx = Math.max(40, dx * 0.5);
-    const c1x = fromRight ? sx - cx : sx + cx;
-    const c2x = fromRight ? tx + cx : tx - cx;
-    const path = document.createElementNS(SVG, "path");
-    path.setAttribute("d", `M ${sx} ${sy} C ${c1x} ${sy}, ${c2x} ${ty}, ${tx} ${ty}`);
-    svg.appendChild(path);
-    // step badge at midpoint of bezier (approx)
-    const mx = (sx + tx) / 2;
-    const my = (sy + ty) / 2;
-    const g = document.createElementNS(SVG, "g");
-    g.setAttribute("class", "badge");
-    g.setAttribute("transform", `translate(${mx}, ${my})`);
-    const c = document.createElementNS(SVG, "circle");
-    c.setAttribute("r", "10");
-    const t = document.createElementNS(SVG, "text");
-    t.textContent = String(n);
-    g.appendChild(c); g.appendChild(t);
-    svg.appendChild(g);
-  }
-
-  function renderSteps(flow) {
-    const stepsEl = $("steps");
-    stepsEl.innerHTML = "";
-    if (!flow) { stepsEl.innerHTML = `<div class="empty">Pick a flow to see its steps.</div>`; return; }
-    flow.steps.forEach((s, i) => {
-      const row = document.createElement("div");
-      row.className = "step";
-      const fromTitle = data.nodes.find((n) => n.id === s.from)?.title ?? s.from;
-      const toTitle = data.nodes.find((n) => n.id === s.to)?.title ?? s.to;
-      row.innerHTML = `
-        <div class="num">${i + 1}</div>
-        <div>
-          <div class="title">${fromTitle} → ${toTitle}${s.label ? `<span style="color:var(--muted)"> · ${s.label}</span>` : ""}</div>
-          ${s.description ? `<div class="body">${s.description}</div>` : ""}
-        </div>`;
-      stepsEl.appendChild(row);
-    });
-  }
-
-  function selectFlow(id) {
-    clearEdges();
-    if (!id) { renderSteps(null); return; }
-    const flow = data.flows.find((f) => (f.id ?? "") === id);
-    if (!flow) return;
-    document.querySelector(`.flow[data-id="${CSS.escape(id)}"]`)?.classList.add("active");
-    // activate referenced nodes
-    const touched = new Set();
-    flow.steps.forEach((s) => { touched.add(s.from); touched.add(s.to); });
-    touched.forEach((nid) => nodeById.get(nid)?.classList.add("active"));
-    // draw edges (next paint, so layout is settled)
-    requestAnimationFrame(() => {
-      const svg = $("edges");
-      flow.steps.forEach((s, i) => {
-        const f = nodeById.get(s.from), t = nodeById.get(s.to);
-        if (f && t) drawEdge(svg, f, t, i + 1);
+    // Collect unique nodes used in this flow, in encounter order
+    const used = new Map(); // id → node element
+    const order = [];
+    (flow.steps || []).forEach((s) => {
+      [s.from, s.to].forEach((id) => {
+        if (id && !used.has(id)) {
+          order.push(id);
+          used.set(id, null);
+        }
       });
     });
-    renderSteps(flow);
+
+    // Render node cards
+    order.forEach((id) => {
+      const node = nodeById.get(id);
+      const el = document.createElement("div");
+      el.className = "node";
+      el.dataset.id = id;
+      const lane = node?.lane ? laneById.get(node.lane) : null;
+      if (lane?.color) {
+        el.style.setProperty("--cat", lane.color);
+        el.dataset.cat = "1";
+      }
+      const title = node?.title ?? id;
+      const sub = node?.subtitle;
+      el.innerHTML = `<div class="title">${escapeHtml(title)}</div>${sub ? `<div class="sub">${escapeHtml(sub)}</div>` : ""}`;
+      nodesContainer.appendChild(el);
+      used.set(id, el);
+    });
+
+    // SVG overlay for arrows
+    const svg = document.createElementNS(SVG, "svg");
+    svg.setAttribute("class", "edges");
+    svg.setAttribute("xmlns", SVG);
+    diagram.appendChild(svg);
+
+    section.appendChild(diagram);
+
+    // Step list below diagram
+    const ol = document.createElement("ol");
+    ol.className = "steps";
+    (flow.steps || []).forEach((s, idx) => {
+      const li = document.createElement("li");
+      const fromTitle = nodeById.get(s.from)?.title ?? s.from;
+      const toTitle = nodeById.get(s.to)?.title ?? s.to;
+      li.innerHTML = `
+        <div class="num">${idx + 1}</div>
+        <div>
+          <div class="step-title">${escapeHtml(fromTitle)} → ${escapeHtml(toTitle)}${
+            s.label ? `<span class="label">${escapeHtml(s.label)}</span>` : ""
+          }</div>
+          ${s.description ? `<div class="step-desc">${escapeHtml(s.description)}</div>` : ""}
+        </div>`;
+      ol.appendChild(li);
+    });
+    section.appendChild(ol);
+
+    flowsEl.appendChild(section);
+
+    // Stash refs for arrow rendering
+    section._flow = { flow, nodesContainer, svg, used };
+  });
+
+  // Render arrows for every flow (after layout settles)
+  function renderAllArrows() {
+    document.querySelectorAll("section.flow").forEach((section) => {
+      const ctx = section._flow;
+      if (!ctx) return;
+      drawArrows(ctx);
+    });
   }
 
-  // Auto-select first flow if requested
-  if (data.flows?.length && data.defaults?.autoSelectFirst) {
-    selectFlow(data.flows[0].id);
+  function drawArrows({ flow, nodesContainer, svg, used }) {
+    svg.innerHTML = "";
+    const containerRect = svg.getBoundingClientRect();
+
+    (flow.steps || []).forEach((s, i) => {
+      const fromEl = used.get(s.from);
+      const toEl = used.get(s.to);
+      if (!fromEl || !toEl) return;
+
+      const a = fromEl.getBoundingClientRect();
+      const b = toEl.getBoundingClientRect();
+      const ax = a.left - containerRect.left;
+      const ay = a.top - containerRect.top;
+      const bx = b.left - containerRect.left;
+      const by = b.top - containerRect.top;
+
+      const fromCenter = { x: ax + a.width / 2, y: ay + a.height / 2 };
+      const toCenter   = { x: bx + b.width / 2, y: by + b.height / 2 };
+
+      // Decide route: same row + forward → horizontal above; same row + backward → bow down
+      // below (so the curve and label clear any intermediate nodes); different rows → vertical.
+      const sameRow = Math.abs(fromCenter.y - toCenter.y) < Math.max(a.height, b.height) / 2;
+      const goingBackward = sameRow && toCenter.x < fromCenter.x;
+      let sx, sy, tx, ty, c1x, c1y, c2x, c2y, labelOffset;
+      if (sameRow && !goingBackward) {
+        // Forward in-row: connect inner sides, gentle horizontal bezier, label above
+        sx = ax + a.width;
+        sy = fromCenter.y;
+        tx = bx;
+        ty = toCenter.y;
+        const cx = Math.max(40, (tx - sx) * 0.4);
+        c1x = sx + cx; c1y = sy;
+        c2x = tx - cx; c2y = ty;
+        labelOffset = -18;
+      } else if (goingBackward) {
+        // Backward in-row: leave bottom of source, enter bottom of target, big downward bow,
+        // label below the curve. Keeps the badge + label clear of intermediate nodes.
+        sx = fromCenter.x;
+        sy = ay + a.height;
+        tx = toCenter.x;
+        ty = by + b.height;
+        const drop = Math.max(70, Math.abs(sx - tx) * 0.25);
+        c1x = sx; c1y = sy + drop;
+        c2x = tx; c2y = ty + drop;
+        labelOffset = +20;
+      } else {
+        // Cross-row: vertical attach
+        const goingDown = toCenter.y > fromCenter.y;
+        sx = fromCenter.x;
+        sy = goingDown ? ay + a.height : ay;
+        tx = toCenter.x;
+        ty = goingDown ? by : by + b.height;
+        const cy = Math.max(40, Math.abs(ty - sy) * 0.4);
+        c1x = sx; c1y = sy + Math.sign(ty - sy || 1) * cy;
+        c2x = tx; c2y = ty - Math.sign(ty - sy || 1) * cy;
+        labelOffset = -18;
+      }
+
+      const path = document.createElementNS(SVG, "path");
+      path.setAttribute("d", `M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${tx} ${ty}`);
+      svg.appendChild(path);
+
+      // Midpoint (approximate via cubic bezier at t=0.5)
+      const t = 0.5;
+      const mx = bez(sx, c1x, c2x, tx, t);
+      const my = bez(sy, c1y, c2y, ty, t);
+
+      // Numbered badge
+      const g = document.createElementNS(SVG, "g");
+      g.setAttribute("class", "badge");
+      g.setAttribute("transform", `translate(${mx}, ${my})`);
+      const c = document.createElementNS(SVG, "circle");
+      c.setAttribute("r", "11");
+      const num = document.createElementNS(SVG, "text");
+      num.textContent = String(i + 1);
+      g.appendChild(c); g.appendChild(num);
+      svg.appendChild(g);
+
+      // Arrow label (offset above or below based on route)
+      if (s.label) {
+        const lab = document.createElementNS(SVG, "text");
+        lab.setAttribute("class", "arrow-label");
+        lab.setAttribute("x", mx);
+        lab.setAttribute("y", my + labelOffset);
+        lab.textContent = s.label;
+        svg.appendChild(lab);
+      }
+    });
   }
 
-  // Redraw on resize
-  let redrawTimer;
+  function bez(p0, p1, p2, p3, t) {
+    const it = 1 - t;
+    return it*it*it*p0 + 3*it*it*t*p1 + 3*it*t*t*p2 + t*t*t*p3;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  // Initial draw after layout
+  requestAnimationFrame(renderAllArrows);
+
+  // Redraw on resize (debounced)
+  let resizeTimer;
   window.addEventListener("resize", () => {
-    clearTimeout(redrawTimer);
-    redrawTimer = setTimeout(() => {
-      const active = document.querySelector(".flow.active");
-      if (active) selectFlow(active.dataset.id);
-    }, 80);
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(renderAllArrows, 80);
   });
 })();
 </script>
