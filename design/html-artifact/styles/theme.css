@@ -2,32 +2,74 @@
  * html-artifact theme
  * Light + dark mode, mobile-responsive, self-contained.
  * Inline this entire file in a single <style> block at the top of every artifact.
- * Originally derived from the compound-engineering ce-plan --html shared theme
+ *
+ * Palette: shadcn/ui default (neutral grays, near-black primary in light mode,
+ * near-white primary in dark mode). Both shadcn-named tokens (--background,
+ * --foreground, --primary, --muted, …) and artifact-friendly aliases (--bg,
+ * --text, --accent, …) are defined, so any shadcn component dropped into the
+ * artifact picks up the right colors with no extra wiring.
+ *
+ * To match a project's brand, override the shadcn-named tokens in :root and
+ * the aliases inherit automatically. Override --font-display to switch the
+ * headline + big-number face away from serif (e.g. to ui-sans-serif).
+ *
+ * Originally derived from compound-engineering ce-plan --html
  * (https://github.com/EveryInc/compound-engineering-plugin/pull/809).
  */
 
 :root {
   color-scheme: light dark;
-  --bg: #f8fafc;
-  --surface: #ffffff;
-  --surface-soft: #f1f5f9;
-  --surface-strong: #e2e8f0;
-  --text: #111827;
-  --text-muted: #475569;
-  --border: #cbd5e1;
-  --accent: #0f766e;
-  --accent-soft: #ccfbf1;
-  --accent-text: #115e59;
-  --danger: #b91c1c;
-  --danger-soft: #fee2e2;
-  --warning: #a16207;
-  --warning-soft: #fef3c7;
-  --success: #166534;
-  --success-soft: #dcfce7;
-  --code-bg: #0f172a;
-  --code-text: #e2e8f0;
-  --shadow: 0 1px 2px rgb(15 23 42 / 0.08);
-  --radius: 8px;
+
+  /* ---- shadcn/ui default palette ---- */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent-bg: oklch(0.97 0 0);                 /* shadcn --accent renamed — collides with our brand --accent below */
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* ---- artifact aliases (component rules below use these) ---- */
+  --bg: var(--background);
+  --surface: var(--card);
+  --surface-soft: var(--muted);
+  --surface-strong: oklch(0.88 0 0);
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --border: oklch(0.922 0 0);
+  --accent: var(--primary);                     /* brand color — near-black by default; override for color brands */
+  --accent-soft: var(--secondary);
+  --accent-text: var(--secondary-foreground);
+  --danger: var(--destructive);
+  --danger-soft: oklch(0.95 0.04 27);
+
+  /* ---- semantic colors shadcn doesn't define ---- */
+  --warning: oklch(0.66 0.14 75);
+  --warning-soft: oklch(0.96 0.06 80);
+  --success: oklch(0.55 0.14 150);
+  --success-soft: oklch(0.96 0.05 150);
+
+  /* ---- code & misc ---- */
+  --code-bg: oklch(0.145 0 0);
+  --code-text: oklch(0.985 0 0);
+  --shadow: 0 1px 2px oklch(0 0 0 / 0.08);
+  --radius: 0.625rem;
   --font-display: ui-serif, Georgia, "Iowan Old Style", "Apple Garamond", "Times New Roman", serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
@@ -877,26 +919,75 @@ pre .line-highlight {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b1120;
-    --surface: #111827;
-    --surface-soft: #1f2937;
-    --surface-strong: #334155;
-    --text: #f8fafc;
-    --text-muted: #cbd5e1;
-    --border: #334155;
-    --accent: #2dd4bf;
-    --accent-soft: #143a3a;
-    --accent-text: #99f6e4;
-    --danger: #fca5a5;
-    --danger-soft: #3f1d1d;
-    --warning: #facc15;
-    --warning-soft: #3b2f13;
-    --success: #86efac;
-    --success-soft: #12351f;
-    --code-bg: #020617;
-    --code-text: #e2e8f0;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+    /* shadcn defaults */
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent-bg: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --destructive-foreground: oklch(0.985 0 0);
+    --input: oklch(1 0 0 / 0.15);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+
+    /* aliases */
+    --border: oklch(1 0 0 / 0.1);
+    --surface-strong: oklch(0.35 0 0);
+    --danger-soft: oklch(0.28 0.08 27 / 0.5);
+    --warning: oklch(0.82 0.16 80);
+    --warning-soft: oklch(0.28 0.08 80 / 0.5);
+    --success: oklch(0.75 0.16 150);
+    --success-soft: oklch(0.28 0.08 150 / 0.5);
+
+    --code-bg: oklch(0.12 0 0);
+    --code-text: oklch(0.985 0 0);
+    --shadow: 0 1px 2px oklch(0 0 0 / 0.35);
   }
+}
+
+/* Explicit dark-mode class (mirrors @media block) — lets a host page force dark via .dark on <html> or any wrapper. */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent-bg: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --input: oklch(1 0 0 / 0.15);
+  --ring: oklch(0.556 0 0);
+  --border: oklch(1 0 0 / 0.1);
+  --surface-strong: oklch(0.35 0 0);
+  --danger-soft: oklch(0.28 0.08 27 / 0.5);
+  --warning: oklch(0.82 0.16 80);
+  --warning-soft: oklch(0.28 0.08 80 / 0.5);
+  --success: oklch(0.75 0.16 150);
+  --success-soft: oklch(0.28 0.08 150 / 0.5);
+  --code-bg: oklch(0.12 0 0);
+  --shadow: 0 1px 2px oklch(0 0 0 / 0.35);
 }
 
 @media (max-width: 768px) {
