@@ -2,6 +2,11 @@
 // This is a fictional journaling app called "Quill". Read it for shape AND voice:
 // every step is something a real user does, sees, taps, or receives — not a
 // backend trace. Code pointers (if any) are footnotes after an em dash.
+//
+// Flow titles use the standard taxonomy from references/flow-names.md
+// (Onboarding, Logging & Tracking, Editing & Updating, …). Custom names are
+// allowed when nothing fits — "Changing Reminder" here — but stay in the
+// same imperative-gerund voice.
 window.USERFLOWS = {
   "project": {
     "name": "Quill",
@@ -33,8 +38,8 @@ window.USERFLOWS = {
   ],
   "flows": [
     {
-      "id": "sign-up",
-      "title": "Sign up and finish onboarding",
+      "id": "onboarding",
+      "title": "Onboarding",
       "description": "A new visitor creates an account and lands on the Today tab ready to write their first entry.",
       "steps": [
         { "from": "landing",       "to": "signup",        "label": "Tap 'Get started'",
@@ -52,8 +57,8 @@ window.USERFLOWS = {
       ]
     },
     {
-      "id": "write-entry",
-      "title": "Write today's entry",
+      "id": "logging-tracking",
+      "title": "Logging & Tracking",
       "description": "Returning user receives their daily reminder, opens the app, and writes today's entry.",
       "steps": [
         { "from": "push-reminder", "to": "today",  "label": "Tap notification",
@@ -65,8 +70,8 @@ window.USERFLOWS = {
       ]
     },
     {
-      "id": "review-past",
-      "title": "Re-read or edit a past entry",
+      "id": "editing-updating",
+      "title": "Editing & Updating",
       "description": "User browses their archive and revisits an old entry.",
       "steps": [
         { "from": "today",   "to": "history", "label": "Tap 'History' tab",
@@ -76,8 +81,8 @@ window.USERFLOWS = {
       ]
     },
     {
-      "id": "change-reminder",
-      "title": "Change reminder time",
+      "id": "changing-reminder",
+      "title": "Changing Reminder",
       "description": "User adjusts when their daily reminder fires.",
       "steps": [
         { "from": "today",         "to": "account",       "label": "Tap profile avatar",
