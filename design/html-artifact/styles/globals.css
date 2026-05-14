@@ -185,6 +185,22 @@ h1.display,
   box-shadow: var(--shadow);
 }
 
+/* Optional product logo, prepended above the sidebar TOC.
+   The artifact stays single-file: the logo is inlined as SVG markup or
+   a base64 data URL, never an external src. On light mode it renders in
+   its natural color; on dark mode it's collapsed to a clean white
+   silhouette via brightness(0) invert(1). Single-color logos look ideal;
+   multi-color logos lose color in dark mode — acceptable tradeoff. */
+:root { --logo-filter: none; }
+@media (prefers-color-scheme: dark) {
+  :root { --logo-filter: brightness(0) invert(1); }
+}
+.page-logo { margin: 0 8px 14px; line-height: 0; filter: var(--logo-filter);
+  opacity: 0.95; }
+.page-logo svg, .page-logo img, img.page-logo {
+  display: block; height: 30px; width: auto; max-width: 200px;
+}
+
 .toc a {
   display: block;
   border-radius: 6px;
@@ -198,6 +214,15 @@ h1.display,
 .toc a:focus {
   background: var(--surface-soft);
   color: var(--text);
+}
+
+/* Scroll-spy active state — the section currently in view gets its TOC
+   entry highlighted via a small inline <script> at the bottom of each
+   template. Uses the same surface tokens as hover for visual coherence. */
+.toc a.is-active {
+  background: var(--surface-soft);
+  color: var(--text);
+  font-weight: 600;
 }
 
 main { min-width: 0; }

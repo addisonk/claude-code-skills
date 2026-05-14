@@ -108,6 +108,40 @@ The theme ships composable blocks that read faster than a wall of paragraphs. Us
 
 These are all composable — drop them inside any `<section>` of any template. They share the same dark-mode-aware tokens, so no per-component theming is needed.
 
+### 4c. Add the product logo (optional but recommended)
+
+Every template now ships with a `<div class="page-logo" hidden>` slot inside the sidebar `<nav class="toc">` and a built-in scroll-spy script that highlights the section currently in view. A logo in the sidebar makes the artifact feel like the product's, not a generic template.
+
+**Detect it.** Auto-search the usual spots:
+
+```bash
+find . -maxdepth 4 \( -name "logo.svg" -o -name "logo.png" -o -name "logo.jpg" \
+  -o -name "logo-light.svg" -o -name "logo-dark.svg" -o -name "icon.svg" \) \
+  -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/dist/*" \
+  -not -path "*/build/*" -not -path "*/.next/*" 2>/dev/null | head
+```
+
+Look in `public/`, `assets/`, `src/assets/`, `app/`, `brand/`, `branding/`, `static/`.
+
+**Found one?** Use AskUserQuestion to confirm: *"Use `<path>` as the artifact's header logo?"* Options: **Yes** / **Pick a different path** / **Skip (use text-only header)**.
+
+**Found nothing?** AskUserQuestion: *"No product logo found. Provide a path, or skip?"* Options: **Provide path** / **Skip**.
+
+**Embed it.** Replace the `<div class="page-logo" hidden></div>` slot and drop the `hidden` attribute:
+
+- **SVG:** paste the raw markup. Inline SVG stays crisp at any zoom.
+  ```html
+  <div class="page-logo"><svg viewBox="0 0 24 24">…</svg></div>
+  ```
+- **PNG / JPG:** base64-encode and use a data URL on an `<img>`:
+  ```html
+  <img class="page-logo" alt="Acme" src="data:image/png;base64,…">
+  ```
+
+Never use an external `src` — that defeats the offline / single-file contract.
+
+**Dark mode.** The theme defines `--logo-filter`. In light mode the logo renders in its natural color; in dark mode (`prefers-color-scheme: dark`) it's collapsed to a white silhouette via `brightness(0) invert(1)`. Color logos lose color in dark mode — acceptable v1 tradeoff. If color preservation matters for a specific artifact, override `--logo-filter: none` in that file's `<style>` block.
+
 ### 5. Verify
 
 Open the file in a browser. Required checks (the `agent-browser` skill can automate these):
@@ -146,6 +180,7 @@ This makes HTML artifacts a strict superset of markdown frontmatter, not a repla
 - **Mobile-responsive** — readable at 400px viewport. Tables collapse to stacked label-prefixed rows.
 - **Dark mode** — `@media (prefers-color-scheme: dark)` automatically swaps the palette.
 - **Inline SVG only** — `class="diagram"`, `currentColor`, `<title>` for accessibility. No raster images.
+- **Embedded logo (if used)** — inline SVG markup or a base64 data URL in `<div class="page-logo">` / `<img class="page-logo">`. Never an external `src=`. Dark-mode silhouetting is automatic via the `--logo-filter` theme variable.
 - **Under 80KB** for typical documents; under 200KB for visual-heavy explorations.
 
 ## Common Mistakes
