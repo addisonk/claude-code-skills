@@ -943,6 +943,42 @@ pre .line-highlight {
 .code-numbered .row.del .code { background: color-mix(in srgb, var(--danger) 22%, transparent); }
 .code-numbered .row.hl .code { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 
+/* ============================================================
+ * Slide-shape sections.
+ * Every <section> inside .layout > main is a 16:9 slide canvas
+ * that clips overflow — content must fit, or the LLM splits
+ * into more sections. Opt out per section with `.section-free`
+ * for tall content (vertical flowcharts, line-numbered diffs,
+ * tables > 5 rows, implementation-unit detail). Below 720px and
+ * in print, the constraint relaxes — see the media queries at
+ * the bottom of this file.
+ * ============================================================ */
+
+.layout > main > section {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.layout > main > section.section-free {
+  aspect-ratio: auto;
+  overflow: visible;
+}
+
+/* Sidebar TOC slide-number prefix. Pure CSS — counters re-flow
+   automatically when sections are added or reordered. The existing
+   `.toc a { display: block }` rule below stays unchanged; the
+   ::before pseudo-element renders inline before the anchor text. */
+.toc { counter-reset: slide; }
+.toc a { counter-increment: slide; }
+.toc a::before {
+  content: counter(slide, decimal-leading-zero) "  ";
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     /* shadcn defaults */
@@ -1026,6 +1062,14 @@ pre .line-highlight {
 
   .layout { display: block; }
 
+  /* Slide-shape collapses to free-height on mobile — a 16:9 canvas at
+     400px wide is only 225px tall, barely enough for an h2. */
+  .layout > main > section,
+  .layout > main > section.section-free {
+    aspect-ratio: auto;
+    overflow: visible;
+  }
+
   .toc {
     position: static;
     margin-bottom: 16px;
@@ -1087,5 +1131,44 @@ pre .line-highlight {
   .timeline .milestone::after {
     left: -22px; top: 14px;
     transform: none;
+  }
+}
+
+/* ============================================================
+ * Print — one slide per landscape page.
+ * Slide-shape sections become normal block-level boxes (the
+ * aspect-ratio constraint is meaningless in print) and each
+ * one gets a hard page break before it. .section-free sections
+ * flow naturally and may span multiple pages — that's by design
+ * for tall content like diffs and impl-unit detail.
+ * Sidebar TOC, frontmatter pills, and the doc footer are
+ * hidden in print: a printed slide deck doesn't need nav chrome.
+ * ============================================================ */
+
+@media print {
+  @page { size: landscape; }
+
+  body { background: white; color: black; }
+
+  .layout { display: block; padding: 0; }
+
+  .toc,
+  .doc-header .pill-row,
+  .doc-footer {
+    display: none;
+  }
+
+  .layout > main > section,
+  .layout > main > section.section-free {
+    page-break-before: always;
+    aspect-ratio: auto;
+    overflow: visible;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+  }
+
+  .layout > main > section:first-child {
+    page-break-before: auto;
   }
 }

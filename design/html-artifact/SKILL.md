@@ -142,6 +142,64 @@ Never use an external `src` — that defeats the offline / single-file contract.
 
 **Dark mode.** The theme defines `--logo-filter`. In light mode the logo renders in its natural color; in dark mode (`prefers-color-scheme: dark`) it's collapsed to a white silhouette via `brightness(0) invert(1)`. Color logos lose color in dark mode — acceptable v1 tradeoff. If color preservation matters for a specific artifact, override `--logo-filter: none` in that file's `<style>` block.
 
+### 4d. Slide-shape sections
+
+Every `<section>` inside `.layout > main` defaults to a **16:9 slide canvas** with `overflow: hidden`. Wide screens become a deck of slide-shaped sections instead of an endless scroll of mixed compositions. Below 768px the constraint relaxes (sections grow naturally on mobile), and in print each slide-shape section is one landscape page.
+
+**Opt out for tall content** by adding `class="section-free"`:
+
+- Vertical SVG flowcharts (`.diagram` with portrait `viewBox`)
+- Line-numbered diffs and `.code-numbered` window-chrome blocks
+- Tables longer than 5 rows
+- Implementation-unit detail (scope + test scenarios + verification typically runs longer than a slide)
+
+A free-shape section keeps its place in the deck (still gets a sidebar TOC entry, still page-breaks in print) but grows to fit its content.
+
+#### Slide grammar — one composition per section
+
+A slide-shape section is exactly **one** of these compositions. Mixing two in the same `<section>` is forbidden — split into two adjacent sections instead.
+
+| Composition | What it looks like |
+|---|---|
+| (a) **Headline + 3–5 bullets** | One `<h2>` + a short `<ul>` or `<ol>`. Use for problem frames, decisions, gotchas, open questions. |
+| (b) **One stat-grid** | One `.stat-grid` with 2–4 `.stat-card` children. Use for SLO anchors, by-the-numbers slides. |
+| (c) **One diagram with caption** | One `.diagram` SVG + a one-line caption. Use for system overviews, flow summaries. If the SVG is portrait/tall, mark `.section-free`. |
+| (d) **One comparison grid** | One `.compare-grid` with 2–4 `.compare-card` children. Use when picking between approaches. |
+| (e) **One pull-quote** | One `.pull-quote` with optional `<cite>`. Use sparingly — for the one sentence worth setting off as a banner. |
+| (f) **One short table** | One `<table>` with ≤5 rows. Use for requirements, findings, metrics. Beyond 5 rows, mark `.section-free`. |
+
+**Example — what fits in one slide:**
+
+```html
+<!-- composition: one .stat-grid -->
+<section id="stats">
+  <h2>By the numbers</h2>
+  <div class="stat-grid">
+    <div class="stat-card"><p class="stat-label">latency</p><p class="stat-value">180 ms</p></div>
+    <div class="stat-card"><p class="stat-label">volume</p><p class="stat-value">12k/s</p></div>
+    <div class="stat-card"><p class="stat-label">rollout</p><p class="stat-value">3 wks</p></div>
+  </div>
+</section>
+```
+
+**Example — this needs splitting (mixed compositions):**
+
+```html
+<!-- BAD: stat-grid + bullets in one slide. Will clip. -->
+<section id="summary">
+  <h2>Summary</h2>
+  <p>One paragraph of prose.</p>
+  <div class="stat-grid">…</div>
+  <ul><li>…</li><li>…</li></ul>
+</section>
+```
+
+Fix by splitting into three adjacent sections — one prose, one stat-grid, one bullet list. Each gets its own slide and its own sidebar TOC entry.
+
+**Mobile.** Below 768px viewport, the slide constraint releases automatically — sections become free-height and the sidebar stacks on top. No author action needed.
+
+**Print.** `@media print` forces each `<section>` to a landscape page via `page-break-before: always`. Sidebar, frontmatter pills, and footer are hidden. `.section-free` sections flow naturally and may span multiple pages (which is correct — clipping a diff or table in print would be worse than spanning pages).
+
 ### 5. Verify
 
 Open the file in a browser. Required checks (the `agent-browser` skill can automate these):
@@ -175,6 +233,7 @@ This makes HTML artifacts a strict superset of markdown frontmatter, not a repla
 
 - **Self-contained** — no `<link rel="stylesheet">`, no `<script src="...">`, no `<img src="https://...">`, no `@import url(...)`, no web fonts. Open offline to verify.
 - **Embedded theme** — single `<style>` block at the top, the full theme from `styles/globals.css`. No CSS files referenced externally.
+- **Embedded logo (if used)** — inline SVG markup or a base64 data URL in `<div class="page-logo">` / `<img class="page-logo">`. Never an external `src=`. Dark-mode silhouetting is automatic via the `--logo-filter` theme variable.
 - **Semantic HTML** — real `<table>` for tabular data, real `<section>` / `<article>` for grouping, real `<h2>` / `<h3>` for headings. No `<div>` soup.
 - **ASCII IDs only** — anchors like `#summary`, `#requirements`, `#u1`. No emoji or non-ASCII in IDs.
 - **Mobile-responsive** — readable at 400px viewport. Tables collapse to stacked label-prefixed rows.

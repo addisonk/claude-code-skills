@@ -45,9 +45,11 @@
       -->
       <div class="page-logo" hidden></div>
       <a href="#summary">Summary</a>
+      <a href="#stats">Headline stats</a>
       <a href="#problem-frame">Problem Frame</a>
       <a href="#requirements">Requirements</a>
       <a href="#key-technical-decisions">Key Technical Decisions</a>
+      <a href="#approaches">Approaches</a>
       <a href="#implementation-units">Implementation Units</a>
       <a href="#u1">U1. [Name]</a>
       <a href="#u2">U2. [Name]</a>
@@ -77,14 +79,20 @@
         </nav>
       -->
 
+      <!-- composition: headline + short prose. Keep this slide to 1–3 paragraphs. -->
       <section id="summary">
         <h2>Summary</h2>
         <p>[1–3 paragraphs that explain what this is and why it matters.]</p>
+      </section>
 
-        <!--
-          Optional headline stat grid. Use 2–4 metrics that anchor the spec:
-          target SLOs, capacity, expected impact. Big numbers, accent color.
-        -->
+      <!--
+        Optional headline stat grid as its own slide. 2–4 metrics that anchor
+        the spec: target SLOs, capacity, expected impact. Big numbers, accent
+        color. Delete this section if the spec doesn't have anchor metrics.
+        composition: one .stat-grid
+      -->
+      <section id="stats">
+        <h2>By the numbers</h2>
         <div class="stat-grid">
           <div class="stat-card">
             <p class="stat-label">p99 latency target</p>
@@ -104,11 +112,17 @@
         </div>
       </section>
 
+      <!-- composition: headline + short prose. -->
       <section id="problem-frame">
         <h2>Problem Frame</h2>
         <p>[What problem is being solved, for whom, and what changes when we ship.]</p>
       </section>
 
+      <!--
+        composition: one short table (≤5 rows). For specs with more than 5
+        requirements, mark this section `class="section-free"` so the table
+        can grow tall instead of being clipped.
+      -->
       <section id="requirements">
         <h2>Requirements</h2>
         <div class="table-wrap">
@@ -134,18 +148,24 @@
         </div>
       </section>
 
+      <!-- composition: headline + 3–5 bullets. Keep decisions terse. -->
       <section id="key-technical-decisions">
         <h2>Key Technical Decisions</h2>
         <ul>
           <li><strong>[Decision]:</strong> [Chosen option, with one-line rationale.]</li>
           <li><strong>[Decision]:</strong> [Chosen option, with one-line rationale.]</li>
         </ul>
+      </section>
 
-        <!--
-          Optional approach-comparison block. Use when an early section of the
-          spec compares 2–4 candidate approaches before settling on one.
-          Mark the chosen one with `is-selected`.
-        -->
+      <!--
+        Optional approach-comparison slide. Use when the spec compares 2–4
+        candidate approaches before settling on one. Mark the chosen one
+        with `is-selected`. Delete this section if there's only one
+        approach worth discussing.
+        composition: one .compare-grid
+      -->
+      <section id="approaches">
+        <h2>Approaches considered</h2>
         <div class="compare-grid">
           <article class="compare-card">
             <span class="compare-tag">A</span>
@@ -178,14 +198,18 @@
         </div>
       </section>
 
-      <section id="implementation-units">
+      <!--
+        Implementation-units overview slide. Contains the dependency SVG
+        which is portrait-tall, so the section is `.section-free`. The
+        individual unit sections live as their own top-level sections
+        directly below — each one is also `.section-free` because unit
+        detail (scope, test scenarios) runs longer than a slide canvas.
+        composition: one diagram with caption
+      -->
+      <section id="implementation-units" class="section-free">
         <h2>Implementation Units</h2>
         <p>[Optional one-paragraph overview of the work breakdown.]</p>
 
-        <!--
-          Dependency diagram, vertical (top-to-bottom). Wide diagrams get
-          cropped on narrow viewports — see references/svg-patterns.md.
-        -->
         <svg class="diagram" viewBox="0 0 360 480" role="img" aria-labelledby="dependency-title" xmlns="http://www.w3.org/2000/svg">
           <title id="dependency-title">Dependency graph between implementation units</title>
           <defs>
@@ -206,33 +230,39 @@
           <line x1="110" y1="266" x2="160" y2="366" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
           <line x1="250" y1="266" x2="200" y2="366" stroke="currentColor" marker-end="url(#dep-arrow)"></line>
         </svg>
+      </section>
 
-        <article id="u1">
-          <h3>U1. [Unit name]</h3>
-          <p>[Purpose: one or two sentences.]</p>
-          <h4>Scope</h4>
-          <ul>
-            <li>[Bullet.]</li>
-            <li>[Bullet.]</li>
-          </ul>
-          <h4>Test scenarios</h4>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Scenario</th><th>Expected</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td data-label="Scenario">[Action / input.]</td>
-                  <td data-label="Expected">[Expected outcome.]</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </article>
+      <!--
+        Each implementation unit is its own top-level section, marked
+        `.section-free` because scope + test scenarios + verification
+        typically run longer than a 16:9 canvas. The unit's H3 heading
+        replaces the legacy <article> wrapper.
+      -->
+      <section id="u1" class="section-free">
+        <h3>U1. [Unit name]</h3>
+        <p>[Purpose: one or two sentences.]</p>
+        <h4>Scope</h4>
+        <ul>
+          <li>[Bullet.]</li>
+          <li>[Bullet.]</li>
+        </ul>
+        <h4>Test scenarios</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Scenario</th><th>Expected</th></tr></thead>
+            <tbody>
+              <tr>
+                <td data-label="Scenario">[Action / input.]</td>
+                <td data-label="Expected">[Expected outcome.]</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-        <article id="u2">
-          <h3>U2. [Unit name]</h3>
-          <p>[Purpose.]</p>
-        </article>
+      <section id="u2" class="section-free">
+        <h3>U2. [Unit name]</h3>
+        <p>[Purpose.]</p>
       </section>
 
       <section id="test-scenarios">

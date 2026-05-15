@@ -139,6 +139,19 @@ Unit-level entries (U1, U2) are optional but useful when a plan has more than 3 
 </section>
 ```
 
+Every `<section>` inside `.layout > main` defaults to a 16:9 slide canvas with `overflow: hidden`. Pick one composition per section (bullets, stat-grid, diagram, compare-grid, pull-quote, or short table — see SKILL.md §4d).
+
+### Section opting out of slide-shape
+
+```html
+<section id="diffs" class="section-free">
+  <h2>Annotated diff</h2>
+  <!-- inherently tall content: window-chrome diff, vertical SVG, > 5-row table, impl-unit detail -->
+</section>
+```
+
+Apply `.section-free` whenever the section contains a vertical flowchart, a line-numbered diff, a table > 5 rows, or implementation-unit detail. The section still gets a sidebar TOC entry and page-breaks in print; it just grows to fit its content.
+
 ### Section with table
 
 ```html
@@ -163,10 +176,12 @@ Unit-level entries (U1, U2) are optional but useful when a plan has more than 3 
 
 `data-label` attributes drive the mobile (≤768px) collapsed-row view automatically.
 
-### Implementation unit article
+### Implementation unit section
+
+Each unit is its own top-level `<section class="section-free">` (not a nested `<article>`), so it gets its own sidebar TOC entry, its own page break in print, and breathing room for the scope + test scenarios + verification fields that typically run longer than a slide canvas.
 
 ```html
-<article id="u1">
+<section id="u1" class="section-free">
   <h3>U1. Scaffold the route</h3>
   <p>One-sentence purpose.</p>
   <h4>Test scenarios</h4>
@@ -181,7 +196,7 @@ Unit-level entries (U1, U2) are optional but useful when a plan has more than 3 
       </tbody>
     </table>
   </div>
-</article>
+</section>
 ```
 
 ### Callout

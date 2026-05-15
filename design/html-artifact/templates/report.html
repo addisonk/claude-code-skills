@@ -59,6 +59,10 @@
         </ul>
       </aside>
 
+      <!--
+        composition: one diagram with caption. If the diagram is portrait
+        and tall, mark this section `.section-free` instead.
+      -->
       <section id="how-it-works">
         <h2>How it works</h2>
         <p>[The 30-second mental model. End with a diagram.]</p>
@@ -85,7 +89,12 @@
         </svg>
       </section>
 
-      <section id="deep-dive">
+      <!--
+        Deep-dive section is `.section-free` because annotated code with
+        side margin notes is inherently tall, and the data table can grow
+        beyond 5 rows in real reports. Free-shape lets it breathe.
+      -->
+      <section id="deep-dive" class="section-free">
         <h2>Deep dive</h2>
         <p>[Walk through 2-4 things in detail. Use code blocks and tables freely.]</p>
 
@@ -133,12 +142,12 @@
         </div>
       </section>
 
+      <!--
+        composition: numbered checklist. Cap at 3–4 items so they fit
+        in a 16:9 canvas. Beyond 4, mark `.section-free` or split.
+      -->
       <section id="gotchas">
         <h2>Gotchas</h2>
-        <!--
-          Use the checklist primitive for gotchas — big numbered cards read
-          faster than a bulleted list and visually telegraph "watch out".
-        -->
         <ol class="checklist">
           <li><strong>[Gotcha headline]</strong> — [One-sentence explanation of what bites and why.]</li>
           <li><strong>[Gotcha headline]</strong> — [Explanation.]</li>

@@ -135,4 +135,5 @@ The theme ships composable blocks that any template can pull in:
 - `.pull-quote` — pull-quote treatment
 - `.swatch-row` + `.swatch` — color tokens with hex labels
 - `.toggle` — iOS-style switch input for playgrounds
+- `.section-free` — opt-out of the default 16:9 slide canvas. Apply to sections containing vertical flowcharts, line-numbered diffs, tables > 5 rows, or implementation-unit detail. See SKILL.md §4d for the slide grammar (one composition per section).
 

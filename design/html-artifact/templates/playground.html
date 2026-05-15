@@ -44,7 +44,13 @@
     </nav>
 
     <main>
-      <section id="preview">
+      <!--
+        Playground sections are all `.section-free`. Interactive control
+        panels aren't slide narrative — preview surfaces need to grow
+        with the design being tuned, control grids reflow, and the export
+        block is just utility chrome.
+      -->
+      <section id="preview" class="section-free">
         <h2>Preview</h2>
         <div class="preview-pane" id="preview-pane">
           <!-- The live preview lives here. Update it inside the script below. -->
@@ -52,7 +58,7 @@
         </div>
       </section>
 
-      <section id="controls">
+      <section id="controls" class="section-free">
         <h2>Controls</h2>
         <div class="controls">
           <label>
@@ -86,7 +92,7 @@
         </div>
       </section>
 
-      <section id="export">
+      <section id="export" class="section-free">
         <h2>Export</h2>
         <p>Tune the values, then bring the result back into Claude with one click.</p>
         <p>

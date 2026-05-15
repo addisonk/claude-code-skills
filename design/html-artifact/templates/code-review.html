@@ -50,6 +50,7 @@
     </nav>
 
     <main>
+      <!-- composition: one .stat-grid. -->
       <section id="summary-stats">
         <h2>At a glance</h2>
         <div class="stat-grid">
@@ -71,7 +72,12 @@
         </div>
       </section>
 
-      <section id="findings">
+      <!--
+        Findings section is `.section-free` because real PRs commonly have
+        more than 5 findings, and a clipped findings table would lose
+        critical review information.
+      -->
+      <section id="findings" class="section-free">
         <h2>Findings</h2>
         <div class="table-wrap">
           <table>
@@ -102,7 +108,12 @@
         </div>
       </section>
 
-      <section id="diffs">
+      <!--
+        Diffs section is `.section-free` — line-numbered window-chrome
+        diffs are inherently tall, and side margin notes add to that.
+        Forcing this into a 16:9 canvas would clip the diff.
+      -->
+      <section id="diffs" class="section-free">
         <h2>Annotated diff</h2>
         <p>[Brief framing: which file, what changed.]</p>
 
@@ -150,7 +161,12 @@
         </div>
       </section>
 
-      <section id="flow">
+      <!--
+        Flow section is `.section-free` because the SVG is a vertical
+        flow diagram (320x360 portrait) — taller than a 16:9 canvas
+        would allow.
+      -->
+      <section id="flow" class="section-free">
         <h2>What changed in the flow</h2>
         <p>[One sentence. End with a vertical SVG when the change shifts a control or data path.]</p>
 
@@ -172,6 +188,7 @@
         </svg>
       </section>
 
+      <!-- composition: headline + 3–5 bullets. -->
       <section id="tests">
         <h2>Tests</h2>
         <ul>
@@ -181,6 +198,7 @@
         <p>[Missing coverage to flag, if any.]</p>
       </section>
 
+      <!-- composition: headline + short list. -->
       <section id="open">
         <h2>Open questions</h2>
         <ul>
