@@ -11,7 +11,8 @@
  *
  * To match a project's brand, override the shadcn-named tokens in :root and
  * the aliases inherit automatically. Override --font-display to switch the
- * headline + big-number face away from serif (e.g. to ui-sans-serif).
+ * headline + big-number face to another sans (the default is Inter when
+ * installed locally, otherwise the OS UI font via system-ui).
  *
  * Originally derived from compound-engineering ce-plan --html
  * (https://github.com/EveryInc/compound-engineering-plugin/pull/809).
@@ -70,7 +71,7 @@
   --code-text: oklch(0.985 0 0);
   --shadow: 0 1px 2px oklch(0 0 0 / 0.08);
   --radius: 0.625rem;
-  --font-display: ui-serif, Georgia, "Iowan Old Style", "Apple Garamond", "Times New Roman", serif;
+  --font-display: "Inter", system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
@@ -81,7 +82,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.6;
 }

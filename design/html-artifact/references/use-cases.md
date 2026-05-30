@@ -124,7 +124,7 @@ When in doubt: start with `spec-or-plan.html` — it has the most flexible struc
 
 The theme ships composable blocks that any template can pull in:
 
-- `.stat-grid` + `.stat-card` — anchor numbers, big serif value in accent color
+- `.stat-grid` + `.stat-card` — anchor numbers, big sans-serif value in accent color
 - `.bento` — varied-tile grid with one hero
 - `.timeline` — horizontal milestones, stacks vertically on mobile
 - `.checklist` — numbered cards with accent-colored numerals

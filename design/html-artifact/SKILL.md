@@ -97,7 +97,7 @@ Each pattern uses `class="diagram"`, `currentColor` for stroke/fill, and a `<tit
 
 The theme ships composable blocks that read faster than a wall of paragraphs. Use them when the content shape matches:
 
-- **`.stat-grid` / `.stat-card`** — 2–4 anchor numbers (SLOs, volumes, deadlines). Big serif value in accent color over a short uppercase label.
+- **`.stat-grid` / `.stat-card`** — 2–4 anchor numbers (SLOs, volumes, deadlines). Big sans-serif value in accent color over a short uppercase label.
 - **`.bento`** — varied-size tiles with one hero + 3–5 supporting. Good for "X kinds of things" overviews, feature inventories, design-system summaries.
 - **`.timeline`** — horizontal milestone bar for roadmaps and phases (≤6 milestones). Stacks vertically on mobile.
 - **`.checklist`** — ordered list with big accent-colored numerals. Use for gotchas, recommendations, and next-step lists where a flat `<ul>` reads too quietly.
