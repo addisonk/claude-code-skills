@@ -1,7 +1,7 @@
 ---
 title: "feat: Slide-shape layer for html-artifact"
 type: feat
-status: active
+status: complete
 date: 2026-05-15
 target_repo: addisonk/claude-code-skills
 local_mirror: /Users/addisonkowalski/Dropbox/.agents/skills/html-artifact
