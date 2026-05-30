@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout Catalog — html-artifact</title>
+<style>
 /*
  * html-artifact theme
  * Light + dark mode, mobile-responsive, self-contained.
@@ -987,7 +994,7 @@ pre .line-highlight {
  * flows from the top — the implicit `stack` default (today's
  * behavior). `.section-free` sections opt out of the canvas, so
  * layouts don't apply to them. Below 768px every layout relaxes
- * to free-flow. Full catalog + selection guide: references/layout-catalog.md
+ * to free-flow. Full catalog + selection guide: references/layouts.md
  * ============================================================ */
 
 /* Vertically-centered layouts — the content block fills the canvas. */
@@ -1266,3 +1273,135 @@ pre .line-highlight {
     page-break-before: auto;
   }
 }
+
+</style>
+</head>
+<body>
+  <header class="doc-header">
+    <p class="eyebrow">Demo</p>
+    <h1>html-artifact Layout Catalog</h1>
+    <p class="summary">One slide per named layout. Each section carries a <code>layout-*</code> class that arranges its content inside the 16:9 canvas.</p>
+    <div class="pill-row"><span class="pill pill-status-active">status: demo</span><span class="pill pill-type-feat">type: feat</span><span class="pill pill-date">date: 2026-05-30</span></div>
+  </header>
+  <div class="layout">
+    <nav class="toc" aria-label="Table of contents">
+      <div class="page-logo"><svg viewBox="0 0 120 24" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="4" width="16" height="16" rx="4" fill="currentColor"/><text x="24" y="17" font-family="sans-serif" font-size="14" font-weight="700" fill="currentColor">ACME</text></svg></div>
+      <a href="#s0">hero</a>
+      <a href="#s1">concept</a>
+      <a href="#s2">editorial</a>
+      <a href="#s3">data</a>
+      <a href="#s4">comparison</a>
+      <a href="#s5">quote</a>
+      <a href="#s6">checklist</a>
+      <a href="#s7">bento</a>
+      <a href="#s8">timeline</a>
+      <a href="#s9">diagram</a>
+      <a href="#s10">stack (default)</a>
+      
+    </nav>
+    <main>
+      <section id="s0" class="slide layout-hero">
+        
+        <div class="hero-bar"></div>
+        <h2>The Layout Catalog</h2>
+        <p class="hero-sub">Ten named arrangements that fill the 16:9 slide canvas — so a section reads like a slide, not a wall of text pinned to the top.</p>
+      </section>
+      <section id="s1" class="slide layout-concept">
+        
+        <h2>One idea, one metaphor</h2>
+        <figure style="margin:0"><svg class="diagram" viewBox="0 0 200 200" role="img" aria-label="key metaphor" xmlns="http://www.w3.org/2000/svg" style="max-width:240px">
+  <circle cx="70" cy="70" r="34" fill="none" stroke="currentColor" stroke-width="6"/>
+  <circle cx="70" cy="70" r="12" fill="none" stroke="currentColor" stroke-width="6"/>
+  <line x1="94" y1="94" x2="160" y2="160" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+  <line x1="140" y1="140" x2="160" y2="120" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+  <line x1="152" y1="152" x2="170" y2="134" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+</svg><figcaption>The <code>concept</code> layout centers a symbolic inline-SVG and lets a one-line caption carry the meaning.</figcaption></figure>
+      </section>
+      <section id="s2" class="slide layout-editorial">
+        
+        <div>
+          <h2>Editorial split</h2>
+          <p>A magazine-style 60 / 40 grid: prose holds the left column, a visual or callout anchors the right. Both columns are vertically centered in the canvas.</p>
+          <p>Use it when an idea needs a paragraph of explanation <em>and</em> a supporting figure side by side.</p>
+        </div>
+        <div class="editorial-aside">
+          <div class="stat-card"><p class="stat-label">image : text</p><p class="stat-value">40 / 60</p><p class="stat-context">no raster — SVG or callout</p></div>
+        </div>
+      </section>
+      <section id="s3" class="slide layout-data">
+        
+        <h2>By the numbers</h2>
+        <div class="stat-grid">
+          <div class="stat-card"><p class="stat-label">layouts</p><p class="stat-value">10</p><p class="stat-context">+ stack default</p></div>
+          <div class="stat-card"><p class="stat-label">new CSS</p><p class="stat-value">~95 ln</p><p class="stat-context">composable classes</p></div>
+          <div class="stat-card"><p class="stat-label">raster images</p><p class="stat-value">0</p><p class="stat-context">self-contained</p></div>
+        </div>
+      </section>
+      <section id="s4" class="slide layout-comparison">
+        
+        <h2>Pick an approach</h2>
+        <div class="compare-grid">
+          <article class="compare-card"><span class="compare-tag">A</span><h3>Loose grammar</h3><p>The old a–f prose.</p><ul class="compare-tradeoffs"><li class="pro">flexible</li><li class="con">vague</li></ul></article>
+          <article class="compare-card is-selected"><span class="compare-tag">B</span><h3>Named catalog</h3><p>Chosen.</p><ul class="compare-tradeoffs"><li class="pro">explicit</li><li class="pro">repeatable</li><li class="con">more classes</li></ul></article>
+        </div>
+      </section>
+      <section id="s5" class="slide layout-quote">
+        
+        <blockquote class="pull-quote">Every section is a slide; one composition per canvas — now with a name you can point at.<cite>— the design brief</cite></blockquote>
+      </section>
+      <section id="s6" class="slide layout-checklist">
+        
+        <h2>How to use a layout</h2>
+        <ol class="checklist">
+          <li>Pick the archetype that matches your content shape.</li>
+          <li>Add <code>class="slide layout-name"</code> to the section.</li>
+          <li>Drop in the matching primitive — the layout centers it.</li>
+        </ol>
+      </section>
+      <section id="s7" class="slide layout-bento">
+        
+        <h2>Feature bento</h2>
+        <div class="bento">
+          <div class="bento-hero"><h3>Hero tile</h3><p>The anchor — primary message or visual.</p></div>
+          <div><h3>Tile</h3><p>Supporting point.</p></div>
+          <div><h3>Tile</h3><p>Supporting point.</p></div>
+          <div class="bento-wide"><h3>Wide tile</h3><p>Spans two columns for a longer note.</p></div>
+        </div>
+      </section>
+      <section id="s8" class="slide layout-timeline">
+        
+        <h2>Roadmap</h2>
+        <div class="timeline">
+          <div class="milestone"><span class="date">W1</span><span class="label">CSS catalog</span></div>
+          <div class="milestone"><span class="date">W2</span><span class="label">Reference docs</span></div>
+          <div class="milestone"><span class="date">W3</span><span class="label">Templates</span></div>
+          <div class="milestone"><span class="date">W4</span><span class="label">Ship</span></div>
+        </div>
+      </section>
+      <section id="s9" class="slide layout-diagram">
+        
+        <h2>Pipeline overview</h2>
+        <figure style="margin:0;width:100%"><svg class="diagram" viewBox="0 0 640 130" role="img" aria-label="pipeline" xmlns="http://www.w3.org/2000/svg" style="max-height:150px">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+  <rect x="16" y="44" width="130" height="46" rx="8" fill="none" stroke="currentColor"/><text x="81" y="72" text-anchor="middle">Source</text>
+  <rect x="255" y="44" width="130" height="46" rx="8" fill="none" stroke="currentColor"/><text x="320" y="72" text-anchor="middle">Transform</text>
+  <rect x="494" y="44" width="130" height="46" rx="8" fill="none" stroke="currentColor"/><text x="559" y="72" text-anchor="middle">Sink</text>
+  <line x1="146" y1="67" x2="247" y2="67" stroke="currentColor" marker-end="url(#ar)"/>
+  <line x1="385" y1="67" x2="486" y2="67" stroke="currentColor" marker-end="url(#ar)"/>
+</svg><figcaption>The <code>diagram</code> layout lets one SVG fill the canvas with a caption beneath.</figcaption></figure>
+      </section>
+      <section id="s10" class="slide">
+        
+        <h2>Stack — the default</h2>
+        <p>A section with no <code>layout-*</code> class flows from the top, exactly like before. Use it for prose, mixed notes, or anything that doesn't fit a named archetype.</p>
+        <ul>
+          <li>Top-aligned, natural reading flow.</li>
+          <li>Still clipped to 16:9 unless marked <code>.section-free</code>.</li>
+          <li>The safe fallback when in doubt.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+  <footer class="doc-footer"><p>html-artifact layout-catalog demo.</p></footer>
+</body>
+</html>

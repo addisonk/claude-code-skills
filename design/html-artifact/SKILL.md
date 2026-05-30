@@ -142,9 +142,9 @@ Never use an external `src` — that defeats the offline / single-file contract.
 
 **Dark mode.** The theme defines `--logo-filter`. In light mode the logo renders in its natural color; in dark mode (`prefers-color-scheme: dark`) it's collapsed to a white silhouette via `brightness(0) invert(1)`. Color logos lose color in dark mode — acceptable v1 tradeoff. If color preservation matters for a specific artifact, override `--logo-filter: none` in that file's `<style>` block.
 
-### 4d. Slide-shape sections
+### 4d. Slide-shape sections + the layout catalog
 
-Every `<section>` inside `.layout > main` defaults to a **16:9 slide canvas** with `overflow: hidden`. Wide screens become a deck of slide-shaped sections instead of an endless scroll of mixed compositions. Below 768px the constraint relaxes (sections grow naturally on mobile), and in print each slide-shape section is one landscape page.
+Every `<section>` inside `.layout > main` defaults to a **16:9 slide canvas** with `overflow: hidden`. Wide screens become a deck of slide-shaped sections instead of an endless scroll of mixed compositions. Below 768px the constraint relaxes (sections grow naturally on mobile), and in print each slide-shape section is one landscape page. Each slide also takes a **named layout** (see the catalog below) that arranges its content within the canvas.
 
 **Opt out for tall content** by adding `class="section-free"`:
 
@@ -155,24 +155,33 @@ Every `<section>` inside `.layout > main` defaults to a **16:9 slide canvas** wi
 
 A free-shape section keeps its place in the deck (still gets a sidebar TOC entry, still page-breaks in print) but grows to fit its content.
 
-#### Slide grammar — one composition per section
+#### The layout catalog — one named layout per slide
 
-A slide-shape section is exactly **one** of these compositions. Mixing two in the same `<section>` is forbidden — split into two adjacent sections instead.
+A slide-shape section uses exactly **one** named layout from the catalog. The layout class arranges the section's content *inside* the 16:9 canvas (most center it vertically; `editorial` splits 60/40) so the slide reads composed, not pinned to the top. Mixing two compositions in one `<section>` is still forbidden — split into two adjacent sections instead.
 
-| Composition | What it looks like |
-|---|---|
-| (a) **Headline + 3–5 bullets** | One `<h2>` + a short `<ul>` or `<ol>`. Use for problem frames, decisions, gotchas, open questions. |
-| (b) **One stat-grid** | One `.stat-grid` with 2–4 `.stat-card` children. Use for SLO anchors, by-the-numbers slides. |
-| (c) **One diagram with caption** | One `.diagram` SVG + a one-line caption. Use for system overviews, flow summaries. If the SVG is portrait/tall, mark `.section-free`. |
-| (d) **One comparison grid** | One `.compare-grid` with 2–4 `.compare-card` children. Use when picking between approaches. |
-| (e) **One pull-quote** | One `.pull-quote` with optional `<cite>`. Use sparingly — for the one sentence worth setting off as a banner. |
-| (f) **One short table** | One `<table>` with ≤5 rows. Use for requirements, findings, metrics. Beyond 5 rows, mark `.section-free`. |
+Add the layout as a second class: `class="slide layout-data"`. A section with **no** `layout-*` class falls back to `stack` (top-aligned flow — the document default). Full per-layout specs live in `references/layouts/{name}.md`; the index + selection guide is `references/layout-catalog.md`.
 
-**Example — what fits in one slide:**
+| Layout | Use for | Wraps primitive |
+|---|---|---|
+| `layout-hero` | cover, section opener, the single biggest idea | — (headline + `.hero-bar`) |
+| `layout-concept` | one abstract idea via a metaphor | `.diagram` SVG + caption |
+| `layout-editorial` | a paragraph **and** a supporting visual, side by side | 60/40 grid (`.editorial-aside`) |
+| `layout-data` | 2–4 anchor numbers / KPIs | `.stat-grid` |
+| `layout-comparison` | picking between 2–4 approaches | `.compare-grid` |
+| `layout-quote` | one memorable sentence as a banner | `.pull-quote` |
+| `layout-checklist` | ordered steps, gotchas, next actions | `.checklist` |
+| `layout-bento` | feature overview, "X kinds of things" | `.bento` |
+| `layout-timeline` | roadmap, phases, milestones (≤6) | `.timeline` |
+| `layout-diagram` | one diagram is the whole slide | `.diagram` SVG + caption |
+| `stack` *(default)* | prose, mixed bullets, anything else | — (no class) |
+
+**Selection:** match the content's *shape* to a layout. Numbers → `data`. Choosing between options → `comparison`. A flow → `diagram`. A paragraph beside a figure → `editorial`. Prose that fits no archetype → leave it `stack`.
+
+**Example — a stat slide:**
 
 ```html
-<!-- composition: one .stat-grid -->
-<section id="stats">
+<!-- layout-data centers the stat-grid in the canvas -->
+<section id="stats" class="slide layout-data">
   <h2>By the numbers</h2>
   <div class="stat-grid">
     <div class="stat-card"><p class="stat-label">latency</p><p class="stat-value">180 ms</p></div>
@@ -185,18 +194,19 @@ A slide-shape section is exactly **one** of these compositions. Mixing two in th
 **Example — this needs splitting (mixed compositions):**
 
 ```html
-<!-- BAD: stat-grid + bullets in one slide. Will clip. -->
-<section id="summary">
+<!-- BAD: a stat-grid AND a bullet list in one slide. Pick one layout per section. -->
+<section id="summary" class="slide layout-data">
   <h2>Summary</h2>
-  <p>One paragraph of prose.</p>
   <div class="stat-grid">…</div>
   <ul><li>…</li><li>…</li></ul>
 </section>
 ```
 
-Fix by splitting into three adjacent sections — one prose, one stat-grid, one bullet list. Each gets its own slide and its own sidebar TOC entry.
+Fix by splitting into two adjacent sections — one `layout-data` stat slide, one `stack` bullet list. Each gets its own slide and sidebar TOC entry.
 
-**Mobile.** Below 768px viewport, the slide constraint releases automatically — sections become free-height and the sidebar stacks on top. No author action needed.
+**Tall content still opts out with `.section-free`** (long tables, diffs, impl-unit detail) — a free-shape section ignores layout centering and grows to fit. See `example-kitchen-sink.html` for one slide per layout.
+
+**Mobile.** Below 768px the layouts relax: vertical-centering releases, sections become free-height, the `editorial` split collapses to one column, and the sidebar stacks on top. No author action needed.
 
 **Print.** `@media print` forces each `<section>` to a landscape page via `page-break-before: always`. Sidebar, frontmatter pills, and footer are hidden. `.section-free` sections flow naturally and may span multiple pages (which is correct — clipping a diff or table in print would be worse than spanning pages).
 
