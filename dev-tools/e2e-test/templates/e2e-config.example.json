@@ -1,0 +1,40 @@
+{
+  "baseUrl": "http://localhost:3000",
+
+  "upload": {
+    "endpoint": "https://<accountid>.r2.cloudflarestorage.com",
+    "region": "auto",
+    "bucket": "qa-artifacts",
+    "publicBase": "https://cdn.podist.ai/qa-artifacts",
+    "keyPrefix": "html"
+  },
+
+  "expo": {
+    "appDir": "apps/mobile",
+    "metroPort": 8082,
+    "serveSimPort": 3210,
+    "simulator": "iPhone 16 Pro"
+  },
+
+  "theme": {
+    "strategy": "class",
+    "storageKey": "theme",
+    "darkValue": "dark",
+    "lightValue": "light"
+  },
+
+  "auth": {
+    "provider": "clerk",
+    "signInPath": "/",
+    "signInButton": "Sign in",
+    "emailField": "Email address",
+    "passwordField": "Password",
+    "submitButton": "Sign in"
+  },
+
+  "defaults": {
+    "viewport": [1440, 900],
+    "capture": "both",
+    "colorScheme": "dark"
+  }
+}
