@@ -1,12 +1,9 @@
 {
   "baseUrl": "http://localhost:3000",
 
+  "_upload_note": "OPTIONAL. Credentials + endpoint/bucket/publicBase come from R2_* env (store them in ~/.claude/settings.json env; see references/uploader.md). Only add an 'upload' block to override per project, e.g. a different keyPrefix or bucket.",
   "upload": {
-    "endpoint": "https://<accountid>.r2.cloudflarestorage.com",
-    "region": "auto",
-    "bucket": "qa-artifacts",
-    "publicBase": "https://cdn.podist.ai/qa-artifacts",
-    "keyPrefix": "html"
+    "keyPrefix": "qa-artifacts"
   },
 
   "expo": {

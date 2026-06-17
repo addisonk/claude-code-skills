@@ -26,7 +26,7 @@ serve-sim streams the simulator as an MJPEG video, **not** a DOM - agent-browser
 
 - **If something needed is missing, stop and instruct the user - never hack around, fake, or give up.** When a required tool, dependency, credential, config value, running dev server, or test account is absent, halt that step and tell the user exactly what to add and the command to add it (see Setup below). Never fabricate or placeholder evidence, silently skip a story, or downgrade the output to route around the gap. A real report reflects only what actually ran; anything blocked or unverifiable goes in the `gaps` block with the reason.
 - **The report is a hosted HTML QA report, never markdown.** Build it by copying the closest example template and editing only its `report-data` JSON (Step 7). See [report-blocks.md](references/report-blocks.md).
-- **Always upload evidence to CDN.** Every screenshot, MP4, log, Maestro report/YAML, and the report HTML uploads via `scripts/upload-artifact.sh`; the report references absolute CDN URLs only - never `file://` or local paths. Missing upload config/creds → **fail loudly**, do not silently fall back to local.
+- **Always upload evidence to CDN.** Every screenshot, MP4, log, Maestro report/YAML, and the report HTML uploads via `scripts/upload-artifact.sh` (dependency-free node; reads `R2_*` env for endpoint/bucket/public URL + creds). The report references absolute CDN URLs only - never `file://` or local paths. Missing `R2_*` env → **fail loudly** and point the user to `~/.claude/settings.json`; never fall back to local. See [uploader.md](references/uploader.md).
 - **Five report blocks are mandatory:** `report` header, `verdict`, `flow-results`, a `recording` per story, and `gaps`. Everything else renders only when real evidence exists.
 - **A screen recording per story is mandatory.**
 - **Multi-app simulator etiquette:** target a specific simulator UDID/device name and a dedicated serve-sim/Metro port. Never run global simulator-erase or kill-all. Before stopping any simulator/Metro/serve-sim process, identify the owning app + port. See [expo-arm.md](references/expo-arm.md).
@@ -38,14 +38,14 @@ serve-sim streams the simulator as an MJPEG video, **not** a DOM - agent-browser
 If any tool below is missing for the platforms you're testing, stop and give the user the install command. Do not skip the step or fake the output.
 
 - **Node** - report tooling + uploader.
-- **aws CLI** (`brew install awscli`) - S3-compatible uploads. See [uploader.md](references/uploader.md).
+- **R2 credentials in your agent env** - `R2_ENDPOINT`, `R2_BUCKET`, `R2_PUBLIC_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`. Store them in `~/.claude/settings.json` `env` (and your Codex env). The uploader is dependency-free node - no aws CLI needed. See [uploader.md](references/uploader.md).
 - **ffmpeg** (`brew install ffmpeg`) - web video `.webm` → `.mp4` conversion.
 - **agent-browser** - the web desktop + web mobile driver.
 - Expo iOS only: **Xcode + an iOS simulator** (`xcrun simctl`), **Maestro** (`curl -Ls https://get.maestro.mobile.dev | bash`), and **serve-sim** (`npx serve-sim`, auto-installs). See [expo-arm.md](references/expo-arm.md).
 
 ## Project config (auto-detected)
 
-Before asking anything, read `docs/testing/e2e-config.json` if present and use it as defaults. See [templates/e2e-config.example.json](templates/e2e-config.example.json) for the full shape, including the required `upload` block (S3-compatible target) and optional `theme`/`auth`/`defaults`. If absent, ask the manual questions.
+Before asking anything, read `docs/testing/e2e-config.json` if present and use it as defaults. See [templates/e2e-config.example.json](templates/e2e-config.example.json) for the full shape. The `upload` block is **optional** (it overrides the `R2_*` env defaults per project); `theme`/`auth`/`defaults`/`expo` are optional too. If absent, ask the manual questions; upload still works off the `R2_*` env.
 
 ## Decision tree (execute first)
 
