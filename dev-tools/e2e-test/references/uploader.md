@@ -1,52 +1,76 @@
-# Evidence Uploader (S3-compatible)
+# Evidence Uploader (S3-compatible, R2)
 
-Every run uploads its artifacts to object storage so the HTML report renders inline anywhere via absolute CDN URLs. The uploader is **repo-agnostic** - it works in any project, not just one with a bundled helper - by reading a config block + env credentials. `scripts/upload-artifact.sh` is the entry point.
+Every run uploads its artifacts to object storage so the HTML report renders inline anywhere via absolute CDN URLs. The uploader is **dependency-free** - `scripts/upload-artifact.mjs` (a thin `upload-artifact.sh` wraps it) signs S3 requests with SigV4 using only Node built-ins. **No `aws` CLI or SDK install needed.** Entry point: `scripts/upload-artifact.sh`.
 
-## Config (`docs/testing/e2e-config.json` → `upload`)
+## Where target + credentials come from
+
+The uploader reads the machine-standard **`R2_*` environment variables**:
+
+| Var | Purpose | Secret? |
+|-----|---------|---------|
+| `R2_ENDPOINT` | S3 API endpoint, e.g. `https://<acct>.r2.cloudflarestorage.com` | no |
+| `R2_BUCKET` | bucket name | no |
+| `R2_PUBLIC_URL` | public CDN base the bucket is served from, e.g. `https://cdn.podist.ai` | no |
+| `R2_ACCESS_KEY_ID` | access key | **yes** |
+| `R2_SECRET_ACCESS_KEY` | secret key | **yes** |
+
+A file uploaded to `s3://$R2_BUCKET/<key>` is served at `$R2_PUBLIC_URL/<key>`.
+
+## Where to store these (recommended)
+
+Put them once in your agent's env so every run picks them up - never in a repo:
+
+- **Claude Code** - in `~/.claude/settings.json` under an `env` block:
+  ```json
+  {
+    "env": {
+      "R2_ENDPOINT": "https://<account-id>.r2.cloudflarestorage.com",
+      "R2_BUCKET": "<bucket>",
+      "R2_PUBLIC_URL": "https://cdn.example.com",
+      "R2_ACCESS_KEY_ID": "<access-key-id>",
+      "R2_SECRET_ACCESS_KEY": "<secret-access-key>"
+    }
+  }
+  ```
+  Claude Code injects these into the environment of every command it runs.
+- **Codex** - set the same `R2_*` vars in your Codex environment (e.g. the shell profile Codex inherits, or `~/.codex` env config) so they're present when the skill runs there too.
+
+If the vars are missing, the uploader **fails loudly and names this location** - it never falls back to a local-only report.
+
+## Optional per-project override
+
+`docs/testing/e2e-config.json` may carry an `upload` block to override the env defaults for a specific project (e.g. a different bucket or key prefix). Credentials are **never** read from config - only from `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` env.
 
 ```jsonc
 "upload": {
-  "endpoint": "https://<accountid>.r2.cloudflarestorage.com",  // S3-compatible endpoint (R2, AWS S3, etc.)
-  "region": "auto",                                            // "auto" for R2; e.g. "us-east-1" for S3
-  "bucket": "qa-artifacts",
-  "publicBase": "https://cdn.podist.ai/qa-artifacts",          // public URL base the bucket is served from
-  "keyPrefix": "html"                                          // default prefix for this project's runs
+  "endpoint": "https://<acct>.r2.cloudflarestorage.com",  // default: $R2_ENDPOINT
+  "bucket": "qa-artifacts",                                // default: $R2_BUCKET
+  "publicBase": "https://cdn.example.com",                 // default: $R2_PUBLIC_URL
+  "keyPrefix": "qa-artifacts"                              // default: "qa-artifacts"
 }
 ```
 
-The public URL of an uploaded file is `${publicBase}/${key}` where `key` is `${keyPrefix}/<run-or-feature>/<filename>`.
-
-## Credentials (environment only - never committed)
-
-```
-E2E_UPLOAD_ACCESS_KEY_ID=...
-E2E_UPLOAD_SECRET_ACCESS_KEY=...
-```
-Load them from the shell, a gitignored `.env`, or your secret manager before running. The uploader reads only env - it never writes or reads creds from config or the repo.
+The public URL of an uploaded file is `${publicBase}/${key}`, where `key` defaults to `${keyPrefix}/<feature-folder>/<filename>`.
 
 ## Usage
 
 ```bash
-# Upload one file → prints the absolute public URL
+# Upload one file -> prints the absolute public URL
 bash scripts/upload-artifact.sh docs/testing/<feature>/recording-1a.mp4
 
-# Upload with an explicit key suffix (defaults to <feature>/<basename>)
+# Explicit key
 bash scripts/upload-artifact.sh docs/testing/<feature>/report.html --key html/<feature>/report.html
 
-# Verify hosted assets return 200 + expected content-type
-bash scripts/upload-artifact.sh --verify https://cdn.podist.ai/qa-artifacts/html/<feature>/report.html
+# Verify hosted assets return 200 + content-type
+bash scripts/upload-artifact.sh --verify https://cdn.example.com/qa-artifacts/<feature>/report.html
 ```
 
-Content types are set on upload by extension: `.html`→`text/html; charset=utf-8`, `.png/.jpg`→`image/*`, `.mp4`→`video/mp4`, `.yaml/.log/.txt`→`text/plain`, `.json`→`application/json`.
+Content types are set on upload by extension: `.html`→`text/html`, `.png/.jpg/.webp/.gif`→`image/*`, `.mp4`→`video/mp4`, `.mov`→`video/quicktime`, `.yaml/.log/.txt/.xml`→`text/plain`, `.json`→`application/json`.
 
 ## Fail loudly - no silent local fallback
 
-If the `upload` block is missing, or `E2E_UPLOAD_*` env vars are absent, or the underlying `aws` CLI isn't installed, the script **exits non-zero with the exact fix**. Do not produce a local-only report - stop and tell the user what to configure. "Always upload" is a hard requirement; a report pointing at `file://` paths is not shareable and is not acceptable.
-
-## Implementation note
-
-The script shells out to the AWS CLI (`aws s3 cp --endpoint-url`), which speaks to R2, S3, and any S3-compatible store. Install with `brew install awscli` if missing. For a pure-Node alternative, `@aws-sdk/client-s3` works too, but the CLI keeps the skill dependency-light.
+If the target (`R2_ENDPOINT`/`R2_BUCKET`/`R2_PUBLIC_URL`) or credentials are missing, or Node isn't available, the uploader **exits non-zero with the exact fix** (and points at `~/.claude/settings.json`). Do not produce a local-only report - stop and tell the user what to set. "Always upload" is a hard requirement; a report pointing at `file://` paths is not shareable and is not acceptable.
 
 ## Golden-example media is separate
 
-The bundled golden reports' media lives under a **stable** prefix (`qa-artifacts/examples/`) that is never garbage-collected, uploaded once. Per-run artifacts use the project's normal `keyPrefix`. Do not overwrite the `examples/` prefix during ordinary runs. See [report-blocks.md](report-blocks.md) → "Maintaining the golden examples".
+The bundled examples' media points at the live `qa-artifacts/examples/...` and demo assets, uploaded once and never garbage-collected. Per-run artifacts use the project's normal key prefix. Do not overwrite the `examples/` prefix during ordinary runs.
