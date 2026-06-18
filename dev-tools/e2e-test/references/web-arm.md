@@ -3,6 +3,7 @@
 The web arm tests web desktop and web mobile. Two tools, distinct roles (mirrors the iOS arm's serve-sim + Maestro split):
 
 - **agent-browser** - the agent's eyes and hands for the **live exploratory walkthrough**. Drives the app via semantic locators (`snapshot -i`, `find role/label/text`), captures a screenshot at **each screen** in the flow (the `userflows` block is the full screen-by-screen sequence - one frame per screen, not one per story) plus a recording per story. See [techniques.md](techniques.md) and [device-presets.md](device-presets.md).
+  - **In Codex, use the `@browser` plugin instead** (agent-browser is often not on Codex's PATH). Either way, drive a **headless/sandboxed** automation browser - **never the user's real, interactive Chrome**. If neither is available, stop and tell the user (don't hijack their desktop browser).
 - **Playwright** - the **durable, rerunnable regression asset**. Each web story gets a Playwright test (`.spec.ts`) you keep and re-run later, exactly like a Maestro flow is the iOS regression asset. Lean on the `playwright-test` and `playwright-best-practices` skills for authoring.
 
 ## Canonical per-story deliverable
