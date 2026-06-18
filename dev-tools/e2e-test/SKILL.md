@@ -26,7 +26,7 @@ Web: agent-browser walks the flow live; you author a Playwright test as the kept
 
 ## Critical rules (always enforced)
 
-- **If something needed is missing, stop and instruct the user - never hack around, fake, or give up.** When a required tool, dependency, credential, config value, running dev server, or test account is absent, halt that step and tell the user exactly what to add and the command to add it (see Setup below). Never fabricate or placeholder evidence, silently skip a story, or downgrade the output to route around the gap. A real report reflects only what actually ran; anything blocked or unverifiable goes in the `gaps` block with the reason.
+- **If something needed is missing: bootstrap what a repo script can fix, stop and instruct for the rest - never hack around, fake, or give up.** First run the repo's own setup script for fresh-worktree deps (`node scripts/setup-codex-worktree.mjs`, else `pnpm install`; see Setup). For what a repo script can't provide - system tools, credentials, a running dev server, a test account - halt that step and tell the user exactly what to add and the command to add it. Never fabricate or placeholder evidence, silently skip a story, or downgrade the output to route around the gap. A real report reflects only what actually ran; anything blocked or unverifiable goes in the `gaps` block with the reason.
 - **The report is a hosted HTML QA report, never markdown.** Build it by copying the closest example template and editing only its `report-data` JSON (Step 7). See [report-blocks.md](references/report-blocks.md).
 - **Always upload evidence to CDN.** Every screenshot, MP4, log, Maestro report/YAML, and the report HTML uploads via `scripts/upload-artifact.sh` (dependency-free node; reads `R2_*` env for endpoint/bucket/public URL + creds). The report references absolute CDN URLs only - never `file://` or local paths. Missing `R2_*` env → **fail loudly** and point the user to `~/.claude/settings.json`; never fall back to local. See [uploader.md](references/uploader.md).
 - **Five report blocks are mandatory:** `report` header, `verdict`, `flow-results`, a `recording` per story, and `gaps`. Everything else renders only when real evidence exists.
@@ -35,9 +35,12 @@ Web: agent-browser walks the flow live; you author a Playwright test as the kept
 - **Mobile web:** close the desktop session, open fresh, `set device`, `reload` before auth; re-apply device + reload after auth redirects; start recording only after viewport is stable.
 - **Always ask the user about capture format, devices, and color scheme before testing** (unless `e2e-config.json` answers them).
 
-## Setup (required tools - install if missing, never work around)
+## Setup (preflight)
 
-If any tool below is missing for the platforms you're testing, stop and give the user the install command. Do not skip the step or fake the output.
+Two kinds of "missing", handled differently:
+
+1. **Fresh worktree / uninstalled deps → bootstrap it yourself first.** A fresh git worktree has no `node_modules`/`.env.local`, so project deps (e.g. `@playwright/test`) won't resolve. Before flagging anything missing, run the repo's own setup script if it has one - `node scripts/setup-codex-worktree.mjs`, else `pnpm install` / `npm install`. This is the authorized, safe way to bootstrap; don't stop and ask the user for what a repo script fixes. If the worktree is behind `origin/main` and the task needs latest code, `git fetch origin && git rebase origin/main` (never over uncommitted work).
+2. **Genuinely missing system tools / creds → stop and instruct.** For things a repo script can't provide, give the user the exact command and do not skip the step or fake the output:
 
 - **Node** - report tooling + uploader.
 - **R2 credentials in your agent env** - `R2_ENDPOINT`, `R2_BUCKET`, `R2_PUBLIC_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`. Store them in `~/.claude/settings.json` `env` (and your Codex env). The uploader is dependency-free node - no aws CLI needed. See [uploader.md](references/uploader.md).
