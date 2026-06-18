@@ -75,8 +75,13 @@ This is the recorder for both scripted and exploratory stories; Maestro's built-
 
 ### 6. Capture screenshots + logs
 
+Take a screenshot at **every screen** the flow passes through (not just one per story) - each becomes a frame in the `userflows` block, so the report shows the whole journey:
+
 ```bash
-xcrun simctl io <UDID> screenshot docs/testing/<feature>/screenshot-<label>-<slug>.png
+# one per screen, named in order: <label>-NN-<screen>.png
+xcrun simctl io <UDID> screenshot docs/testing/<feature>/screenshot-<label>-01-welcome.png
+xcrun simctl io <UDID> screenshot docs/testing/<feature>/screenshot-<label>-02-topic.png
+# ... step the app forward (Maestro/serve-sim), screenshot each screen ...
 ```
 Save the Maestro run output / report and the flow YAML as artifacts - they upload alongside the recording and feed the report's `maestro` block.
 

@@ -2,7 +2,7 @@
 
 The web arm tests web desktop and web mobile. Two tools, distinct roles (mirrors the iOS arm's serve-sim + Maestro split):
 
-- **agent-browser** - the agent's eyes and hands for the **live exploratory walkthrough**. Drives the app via semantic locators (`snapshot -i`, `find role/label/text`), captures screenshots and a recording per story. See [techniques.md](techniques.md) and [device-presets.md](device-presets.md).
+- **agent-browser** - the agent's eyes and hands for the **live exploratory walkthrough**. Drives the app via semantic locators (`snapshot -i`, `find role/label/text`), captures a screenshot at **each screen** in the flow (the `userflows` block is the full screen-by-screen sequence - one frame per screen, not one per story) plus a recording per story. See [techniques.md](techniques.md) and [device-presets.md](device-presets.md).
 - **Playwright** - the **durable, rerunnable regression asset**. Each web story gets a Playwright test (`.spec.ts`) you keep and re-run later, exactly like a Maestro flow is the iOS regression asset. Lean on the `playwright-test` and `playwright-best-practices` skills for authoring.
 
 ## Canonical per-story deliverable
@@ -15,7 +15,7 @@ Exception - **agent-browser-only exploratory** verification (recording + screens
 
 ### 1. Walk the story with agent-browser
 
-Drive the flow live (Steps 3-4): configure viewport/device, authenticate, `snapshot -i` -> interact -> screenshot, record the run. This is how you observe behavior and learn the exact locators before scripting.
+Drive the flow live (Steps 3-4): configure viewport/device, authenticate, record the run, and at **every screen** do `snapshot -i` -> interact -> **screenshot** (one per screen, named in order, e.g. `screenshot-1a-01-topic.png`). This is how you observe behavior and learn the exact locators before scripting - and the per-screen shots become the `userflows` frames.
 
 ### 2. Author a Playwright test (the regression asset)
 
