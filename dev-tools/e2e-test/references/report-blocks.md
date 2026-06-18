@@ -86,6 +86,14 @@ Full schema for every block (`metrics`, `charts`, `assertions`, `collapsible`, `
 - Short block leads; the evidence carries the weight.
 - After building, verify the hosted report + every asset return `200` (Step 8).
 
+## Keep it lean - no process exhaust
+
+The report is **evidence**, not a run log. A reviewer wants to see whether the feature works; cut anything that doesn't help that judgment.
+
+- **No setup/process narration.** Don't add a `context` block describing preflight checks, which simulator you booted, branch wrangling, Metro ports, or how you set things up - that's process exhaust. Use `context` only for genuine *feature* background a reviewer needs to interpret the result.
+- **Don't duplicate the header.** The `report` frame already shows status, device, commit, timestamp, and test types. Only add a `properties` block for run identity that's genuinely useful *and not already in the header* - and keep it tight (no `localhost` URLs, worktree paths, env-var names, or infra dumps).
+- **Default to the five mandatory blocks + real evidence** (`userflows`, `recording`, `maestro`/`playwright`, and `assertions` when there are real assertions). If a block wouldn't change a reviewer's read of "does it work?", drop it.
+
 ## Maintaining the examples
 
 `qa-report.html` and the `example-*.html` files all share one engine: `qa-report-blocks.html`'s CSS + render script, with only their `report-data` differing. To change an example, edit its `report-data` directly. The engine adds a few authoring-only conveniences read from `report-data`: `report.eyebrow` / `report.summary` / `report.footer` for the cover and footer, and per-block `_group` (collapsible platform section), `_eyebrow` (kicker above a block title), and `_name` (block title). Underscore-prefixed keys are stripped from the "Show JSON" view.

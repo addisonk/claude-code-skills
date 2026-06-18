@@ -102,7 +102,7 @@ Short descriptive slug (e.g. `community-switcher`, `onboarding-smoke`). All arti
 
 ### Step 2 - User stories
 
-Write `docs/testing/<feature-name>/user-stories.md` from [templates/user-stories.md](templates/user-stories.md). Group by `## Web Desktop`, `## Web Mobile`, `## iOS` headings. Every story gets a label (`1a`, `2a`, `3a`) that matches its artifact filenames. User language, independently testable, context-first.
+Write `docs/testing/<feature-name>/user-stories.md` from [templates/user-stories.md](templates/user-stories.md). Group by `## Web Desktop`, `## Web Mobile`, `## iOS` headings. Every story gets a label (`1a`, `2a`, `3a`) that matches its artifact filenames. User language, independently testable, context-first. **Write one story per screen or discrete action, not coarse multi-screen transitions** - split "topic → style" into "pick a topic" / "pick a style" / "reach home" so each story maps to a screen the userflow can show.
 
 ### Step 3-4 - Web (desktop, then mobile)
 
@@ -122,7 +122,7 @@ The script reads the `upload` block from `e2e-config.json` and S3 creds from env
 
 ### Step 7 - Build the HTML QA report
 
-Copy the example closest to what you tested to `docs/testing/<feature-name>/report.html`, then edit only its `report-data` JSON. Pick: `templates/qa-report.html` (multi-platform, collapsible groups), `templates/example-expo.html` (single platform, flat), or `templates/example-web.html` (web desktop + mobile web). Reference `templates/qa-report-blocks.html` for any block's shape. Keep the mandatory blocks; add optional blocks only where evidence exists; use the uploaded absolute CDN URLs for all media. Block policy, format rules, and schema: [report-blocks.md](references/report-blocks.md). Then upload `report.html` itself.
+Copy the example closest to what you tested to `docs/testing/<feature-name>/report.html`, then edit only its `report-data` JSON. Pick: `templates/qa-report.html` (multi-platform, collapsible groups), `templates/example-expo.html` (single platform, flat), or `templates/example-web.html` (web desktop + mobile web). Reference `templates/qa-report-blocks.html` for any block's shape. Keep the mandatory blocks; add optional blocks only where real evidence exists; use the uploaded absolute CDN URLs for all media. **Keep it lean - no setup/process narration (`context`) and no header-duplicating `properties` dumps** (see report-blocks.md "Keep it lean"). Block policy, format rules, and schema: [report-blocks.md](references/report-blocks.md). Then upload `report.html` itself.
 
 ### Step 8 - Verify hosted report
 
