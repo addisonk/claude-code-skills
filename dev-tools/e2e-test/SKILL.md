@@ -50,7 +50,7 @@ Two kinds of "missing", handled differently:
 - **agent-browser** - the web desktop + web mobile exploratory driver.
 - **Playwright** (`npm i -D @playwright/test` + `npx playwright install`) - the web rerunnable regression asset. See [web-arm.md](references/web-arm.md).
 - Expo iOS only: **Xcode + an iOS simulator** (`xcrun simctl`), **a JDK** (Maestro needs Java: `brew install --cask temurin` - `/usr/bin/java` alone is just a stub), **Maestro** (`curl -Ls https://get.maestro.mobile.dev | bash`), and **serve-sim** (`npx serve-sim`, auto-installs). See [expo-arm.md](references/expo-arm.md).
-- **Env note:** different agents see different environments. R2 creds + Homebrew tools (ffmpeg) present for Claude Code aren't automatically present for Codex - set `R2_*` and `PATH` in each agent's env. The preflight (Step 0) catches this per agent.
+- **Env note:** different agents see different environments. R2 creds + Homebrew tools (agent-browser, ffmpeg) present for Claude Code aren't automatically present for Codex. For **Codex**, set `PATH` (incl. `/opt/homebrew/bin`) and the `R2_*` vars under `[shell_environment_policy]` `set` in `~/.codex/config.toml` - Codex trims PATH and filters `KEY`/`SECRET` vars, so a shell-profile export alone won't reach subprocesses (see [uploader.md](references/uploader.md)). The preflight (Step 0) catches this per agent.
 
 ## Project config (auto-detected)
 

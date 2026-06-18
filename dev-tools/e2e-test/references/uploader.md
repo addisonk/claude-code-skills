@@ -33,7 +33,7 @@ Put them once in your agent's env so every run picks them up - never in a repo:
   }
   ```
   Claude Code injects these into the environment of every command it runs.
-- **Codex** - set the same `R2_*` vars in your Codex environment (e.g. the shell profile Codex inherits, or `~/.codex` env config) so they're present when the skill runs there too.
+- **Codex** - add the `R2_*` vars (and `/opt/homebrew/bin` on `PATH`) under `[shell_environment_policy]` `set` in `~/.codex/config.toml`. A shell-profile export is **not** enough: Codex trims PATH and auto-filters `KEY`/`SECRET`/`TOKEN` vars, so `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` get stripped from subprocesses unless explicitly `set`. (See your `agent-machine-setup.md` "Codex Environment" notes.)
 
 If the vars are missing, the uploader **fails loudly and names this location** - it never falls back to a local-only report.
 
