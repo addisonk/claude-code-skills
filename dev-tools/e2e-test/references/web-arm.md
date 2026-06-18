@@ -1,0 +1,59 @@
+# Web Arm - agent-browser + Playwright
+
+The web arm tests web desktop and web mobile. Two tools, distinct roles (mirrors the iOS arm's serve-sim + Maestro split):
+
+- **agent-browser** - the agent's eyes and hands for the **live exploratory walkthrough**. Drives the app via semantic locators (`snapshot -i`, `find role/label/text`), captures screenshots and a recording per story. See [techniques.md](techniques.md) and [device-presets.md](device-presets.md).
+- **Playwright** - the **durable, rerunnable regression asset**. Each web story gets a Playwright test (`.spec.ts`) you keep and re-run later, exactly like a Maestro flow is the iOS regression asset. Lean on the `playwright-test` and `playwright-best-practices` skills for authoring.
+
+## Canonical per-story deliverable
+
+For each web story: **a rerunnable Playwright test + an agent-browser recording (and screenshots) of the walkthrough.**
+
+Exception - **agent-browser-only exploratory** verification (recording + screenshots, no Playwright test) is allowed for stories too awkward to script or one-off smoke checks. Mark every such story "not yet regression-covered" in the report's `gaps` block. Never silently skip the test without flagging it.
+
+## Workflow
+
+### 1. Walk the story with agent-browser
+
+Drive the flow live (Steps 3-4): configure viewport/device, authenticate, `snapshot -i` -> interact -> screenshot, record the run. This is how you observe behavior and learn the exact locators before scripting.
+
+### 2. Author a Playwright test (the regression asset)
+
+Capture the same flow as a test under the test folder:
+
+```
+docs/testing/<feature>/specs/<label>-<slug>.spec.ts
+```
+
+- Use semantic locators (`getByRole`, `getByLabel`, `getByText`) and web-first assertions (`await expect(locator).toBeVisible()`), so the test is robust - the same locators agent-browser surfaced.
+- Match the device: for **web mobile** stories set the mobile viewport/UA (`test.use({ ...devices['iPhone 15'] })` or an explicit `viewport`), mirroring the agent-browser `set device` run.
+
+### 3. Run it, capturing artifacts
+
+```bash
+npx playwright test docs/testing/<feature>/specs/<label>-<slug>.spec.ts --reporter=html
+```
+
+Save the HTML report (and trace on failure) as evidence; upload it and link from the report's `playwright` block.
+
+### 4. Report evidence
+
+- `flow-results` row per story (status + device).
+- `playwright` block listing the spec + run results / report (uploaded URLs) - the web regression surface, analogous to the iOS `maestro` block.
+- `userflows` / `recording` for the agent-browser walkthrough.
+- `gaps` entry for any agent-browser-only story ("not yet regression-covered").
+
+## Artifact naming (matches iOS arm + audit script)
+
+```
+docs/testing/<feature>/
+├── specs/1a-admin-opens-switcher.spec.ts   # Playwright test (rerunnable)
+├── recording-1a-admin-opens-switcher.mp4    # agent-browser walkthrough
+├── screenshot-1a-admin-opens-switcher.png
+└── playwright-report/                        # optional HTML report output
+```
+
+## Notes
+
+- Playwright needs browsers installed once: `npx playwright install`. If `@playwright/test` isn't in the project, install it (`npm i -D @playwright/test`) - per the skill's "missing -> instruct" rule, stop and tell the user rather than skipping the regression asset.
+- `docs/testing/<feature>/specs/` holds the run's evidence copy. For a kept regression suite, also place/keep the spec in the project's own Playwright test directory so CI picks it up.

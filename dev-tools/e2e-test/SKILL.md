@@ -9,13 +9,15 @@ Write user stories for a feature, verify them across web desktop, web mobile, an
 
 One spine runs every platform: **stories → test → evidence → report → audit.** Only the "drive the app" step differs:
 
-| Platform | Driver | Locating | Evidence |
-|----------|--------|----------|----------|
-| Web desktop | agent-browser | semantic (`snapshot -i`, `find`) | screenshot + video |
-| Web mobile | agent-browser (`set device`) | semantic | screenshot + video |
-| Expo iOS | **Maestro** (assert/locate) + **serve-sim** (coordinate gestures) | view hierarchy | `simctl` screen recording |
+Every story produces a **rerunnable regression asset** plus a **recording**; the exploratory driver is just the agent's eyes/hands for the live walkthrough.
 
-serve-sim streams the simulator as an MJPEG video, **not** a DOM - agent-browser's semantic locators do not work on it. Maestro is the semantic driver and the durable rerunnable regression asset; serve-sim is the agent's eyes/hands. iOS screen recordings come from `xcrun simctl io ... recordVideo` (serve-sim has no recorder).
+| Platform | Exploratory walkthrough | Rerunnable regression asset | Recording |
+|----------|------------------------|-----------------------------|-----------|
+| Web desktop | agent-browser (`snapshot -i`, `find`) | **Playwright test** (`.spec.ts`) | screen recording |
+| Web mobile | agent-browser (`set device`) | **Playwright test** (mobile viewport) | screen recording |
+| Expo iOS | serve-sim (coordinate gestures) | **Maestro flow** (`.yaml`) | `simctl` screen recording |
+
+Web: agent-browser walks the flow live; you author a Playwright test as the kept regression asset. See [web-arm.md](references/web-arm.md). iOS: serve-sim streams the simulator as an MJPEG video (**not** a DOM, so agent-browser's semantic locators don't work on it); Maestro is the semantic driver + regression asset, and recordings come from `xcrun simctl io ... recordVideo`. See [expo-arm.md](references/expo-arm.md). Either arm allows an exploratory-only escape hatch (recording, no scripted asset) for stories too awkward to script - flag those in `gaps` as "not yet regression-covered".
 
 ## Script & file paths
 
@@ -40,8 +42,10 @@ If any tool below is missing for the platforms you're testing, stop and give the
 - **Node** - report tooling + uploader.
 - **R2 credentials in your agent env** - `R2_ENDPOINT`, `R2_BUCKET`, `R2_PUBLIC_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`. Store them in `~/.claude/settings.json` `env` (and your Codex env). The uploader is dependency-free node - no aws CLI needed. See [uploader.md](references/uploader.md).
 - **ffmpeg** (`brew install ffmpeg`) - web video `.webm` → `.mp4` conversion.
-- **agent-browser** - the web desktop + web mobile driver.
-- Expo iOS only: **Xcode + an iOS simulator** (`xcrun simctl`), **Maestro** (`curl -Ls https://get.maestro.mobile.dev | bash`), and **serve-sim** (`npx serve-sim`, auto-installs). See [expo-arm.md](references/expo-arm.md).
+- **agent-browser** - the web desktop + web mobile exploratory driver.
+- **Playwright** (`npm i -D @playwright/test` + `npx playwright install`) - the web rerunnable regression asset. See [web-arm.md](references/web-arm.md).
+- Expo iOS only: **Xcode + an iOS simulator** (`xcrun simctl`), **a JDK** (Maestro needs Java: `brew install --cask temurin` - `/usr/bin/java` alone is just a stub), **Maestro** (`curl -Ls https://get.maestro.mobile.dev | bash`), and **serve-sim** (`npx serve-sim`, auto-installs). See [expo-arm.md](references/expo-arm.md).
+- **Env note:** different agents see different environments. R2 creds + Homebrew tools (ffmpeg) present for Claude Code aren't automatically present for Codex - set `R2_*` and `PATH` in each agent's env. The preflight (Step 0) catches this per agent.
 
 ## Project config (auto-detected)
 
@@ -98,7 +102,7 @@ Write `docs/testing/<feature-name>/user-stories.md` from [templates/user-stories
 
 ### Step 3-4 - Web (desktop, then mobile)
 
-agent-browser flow. Configure viewport/device → apply color scheme → authenticate → per story: record → navigate → `snapshot -i` → interact → screenshot → stop+convert recording → check `errors`. Full command reference: [techniques.md](references/techniques.md) and [device-presets.md](references/device-presets.md). Test all desktop stories, then close + reopen with `set device` for mobile.
+Per story: walk the flow live with agent-browser (configure viewport/device → color scheme → authenticate → record → navigate → `snapshot -i` → interact → screenshot → stop+convert recording → check `errors`), **then author a Playwright test** (`docs/testing/<feature>/specs/<label>-<slug>.spec.ts`) as the rerunnable regression asset and run it, capturing artifacts for the `playwright` report block. Test all desktop stories, then close + reopen with `set device` for mobile. Full workflow: [web-arm.md](references/web-arm.md). Command references: [techniques.md](references/techniques.md), [device-presets.md](references/device-presets.md).
 
 ### Step 5 - Expo iOS (if app exists)
 
@@ -138,6 +142,7 @@ Every completed run: all stories checked off or marked blocked with a reason; a 
 
 | File | Content |
 |------|---------|
+| [references/web-arm.md](references/web-arm.md) | agent-browser walkthrough + Playwright regression test authoring |
 | [references/expo-arm.md](references/expo-arm.md) | serve-sim + Maestro workflow, ports/UDID allocation, multi-app etiquette |
 | [references/report-blocks.md](references/report-blocks.md) | Always-vs-optional block policy, `report-data` schema, canonical order |
 | [references/uploader.md](references/uploader.md) | S3-compatible uploader config, env vars, key prefixes, troubleshooting |
