@@ -31,6 +31,9 @@ TOTAL_STORIES=$(echo "$LABELS" | grep -c . || true)
 # iOS story labels (under the ## iOS heading) drive the Maestro-flow check
 IOS_LABELS=$(awk 'tolower($0) ~ /^## *ios/{f=1;next} /^## /{f=0} f' "$STORIES_FILE" \
   | grep -oE '\*?\*?[0-9]+[a-z]\.' | sed 's/[*.]//g' | sort -u || true)
+# Web story labels (under any ## Web heading) drive the Playwright-test check
+WEB_LABELS=$(awk 'tolower($0) ~ /^## *web/{f=1;next} /^## /{f=0} f' "$STORIES_FILE" \
+  | grep -oE '\*?\*?[0-9]+[a-z]\.' | sed 's/[*.]//g' | sort -u || true)
 
 echo "--- Stories ---"
 echo "Total stories: $TOTAL_STORIES"
@@ -90,6 +93,20 @@ if [ -n "$IOS_LABELS" ]; then
       echo "OK: iOS story $label has a Maestro flow"
     else
       echo "INFO: iOS story $label has no Maestro flow - must be flagged 'not yet regression-covered' in the report gaps block"
+    fi
+  done
+  echo ""
+fi
+
+# --- Playwright tests for web stories (informational) ---
+if [ -n "$WEB_LABELS" ]; then
+  echo "--- Playwright tests (web) ---"
+  SPECS=$(find "$FOLDER/specs" \( -name '*.spec.ts' -o -name '*.spec.js' \) 2>/dev/null | sort || true)
+  for label in $WEB_LABELS; do
+    if echo "$SPECS" | grep -q "/${label}-"; then
+      echo "OK: web story $label has a Playwright test"
+    else
+      echo "INFO: web story $label has no Playwright test - must be flagged 'not yet regression-covered' in the report gaps block"
     fi
   done
   echo ""

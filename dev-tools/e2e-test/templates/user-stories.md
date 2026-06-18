@@ -4,9 +4,13 @@
 > **Platforms:** {{PLATFORMS}}  · **Devices:** {{DEVICES}}  · **Capture:** {{CAPTURE_FORMAT}}
 
 Each story has a label (`1a`, `2a`, `3a`…) that must match its artifact filenames
-(`screenshot-1a-*.png`, `recording-1a-*.mp4`, `flows/3a-*.yaml`).
+(`screenshot-1a-*.png`, `recording-1a-*.mp4`, `specs/1a-*.spec.ts`, `flows/3a-*.yaml`).
 
 ## Web Desktop
+
+> Scripted web stories get a Playwright test (`specs/<label>-*.spec.ts`) + an
+> agent-browser recording; exploratory stories get the recording only and are
+> flagged "not yet regression-covered" in the report gaps block.
 
 - [ ] **1a.** As a {{USER_TYPE}}, I {{ACTION}} and {{EXPECTED_OUTCOME}}
 - [ ] **1b.** As a {{USER_TYPE}}, I {{ACTION}} and {{EXPECTED_OUTCOME}}
