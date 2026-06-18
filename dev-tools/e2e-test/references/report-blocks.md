@@ -25,7 +25,7 @@ Format rules of thumb: **one platform means flat blocks (no groups); two or more
 | `recording` | a screen recording per story (mandatory evidence) |
 | `gaps` | limitations + every serve-sim-only story marked "not yet regression-covered". Never hide uncertainty in the summary. |
 
-**Optional - render only when the matching evidence exists:** `maestro` (iOS flow artifacts - the iOS regression surface, present for scripted iOS stories), `playwright` (web test artifacts - the web regression surface, present for scripted web stories), `unit-tests`, `backend`, `userflows` (screenshot sequences), `before-after`, `assertions`, `collapsible`, `metrics`, `charts`, `flowchart`, `specs`, `ledger`, `properties`, `context`.
+**Optional - render only when the matching evidence exists:** `maestro` (iOS flow artifacts - the iOS regression surface, present for scripted iOS stories), `playwright` (web test artifacts - the web regression surface, present for scripted web stories), `unit-tests`, `backend`, `userflows` (the screen-by-screen sequence - **one screenshot per screen** of the flow, not one per story), `before-after`, `assertions`, `collapsible`, `metrics`, `charts`, `flowchart`, `specs`, `ledger`, `properties`, `context`.
 
 The rule: the five mandatory blocks are non-negotiable scaffolding; everything else appears by presence of real evidence - same data-driven model html-artifact uses.
 
