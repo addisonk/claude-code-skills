@@ -77,13 +77,19 @@ This is the recorder for both scripted and exploratory stories; Maestro's built-
 
 ### 6. Capture screenshots + logs
 
-Take a screenshot at **every screen** the flow passes through (not just one per story) - each becomes a frame in the `userflows` block, so the report shows the whole journey:
+Take a screenshot at **every screen** the flow passes through (not just one per story) - each becomes a frame in the `userflows` block, so the report shows the whole journey. **Wait for the screen to settle first** - `simctl io screenshot` grabs whatever pixels are on the device *right now*, so shoot only after the screen's anchor is up. Drive the screenshots **from inside the Maestro flow**: `assertVisible: "<anchor>"` (auto-waits, with retry) then `waitForAnimationToEnd`, then `takeScreenshot`. Never `sleep` before a shot. (See the `maestro-e2e` skill - `rules/assertions.md`, `rules/advanced/waiting.md`.)
 
+```yaml
+# in the flow: settle, then capture - one per screen, named in order
+- assertVisible: "What do you want to hear about?"
+- waitForAnimationToEnd
+- takeScreenshot: docs/testing/<feature>/screenshot-<label>-02-topic
+```
+If you must screenshot from the shell instead, `assertVisible` the anchor via a tiny Maestro step (or poll the serve-sim stream) before the `simctl` shot:
 ```bash
-# one per screen, named in order: <label>-NN-<screen>.png
 xcrun simctl io <UDID> screenshot docs/testing/<feature>/screenshot-<label>-01-welcome.png
+# ... assert the next screen's anchor is visible (Maestro), then ...
 xcrun simctl io <UDID> screenshot docs/testing/<feature>/screenshot-<label>-02-topic.png
-# ... step the app forward (Maestro/serve-sim), screenshot each screen ...
 ```
 Save the Maestro run output / report and the flow YAML as artifacts - they upload alongside the recording and feed the report's `maestro` block.
 

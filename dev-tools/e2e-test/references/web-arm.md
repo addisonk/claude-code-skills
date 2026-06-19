@@ -17,7 +17,9 @@ Exception - **agent-browser-only exploratory** verification (recording + screens
 
 ### 1. Walk the story with agent-browser
 
-Drive the flow live (Steps 3-4): configure viewport/device, authenticate, record the run, and at **every screen** do `snapshot -i` -> interact -> **screenshot** (one per screen, named in order, e.g. `screenshot-1a-01-topic.png`). This is how you observe behavior and learn the exact locators before scripting - and the per-screen shots become the `userflows` frames.
+Drive the flow live (Steps 3-4): configure viewport/device, authenticate, record the run, and at **every screen** do `snapshot -i` -> interact -> **wait for the screen to settle** -> **screenshot** (one per screen, named in order, e.g. `screenshot-1a-01-topic.png`). This is how you observe behavior and learn the exact locators before scripting - and the per-screen shots become the `userflows` frames.
+
+**Wait before every screenshot** so frames aren't blank/mid-load: after navigating or interacting, gate the shot on the screen's anchor - `agent-browser wait --text "<text on the new screen>"` (or `wait --selector <locator>` / `wait --load networkidle`) before `screenshot`. Never screenshot immediately after a click or on a fixed `wait <ms>`.
 
 ### 2. Author a Playwright test (the regression asset)
 
@@ -28,6 +30,7 @@ docs/testing/<feature>/specs/<label>-<slug>.spec.ts
 ```
 
 - Use semantic locators (`getByRole`, `getByLabel`, `getByText`) and web-first assertions (`await expect(locator).toBeVisible()`), so the test is robust - the same locators agent-browser surfaced.
+- **Assert the screen anchor visible before `page.screenshot()`** so spec screenshots aren't mid-load: `await expect(anchor).toBeVisible()` (locators + `expect` auto-wait), optionally `await page.waitForLoadState('networkidle')`. Never `page.waitForTimeout()` for this. See the `playwright-best-practices` skill (`assertions-waiting.md`).
 - Match the device: for **web mobile** stories set the mobile viewport/UA (`test.use({ ...devices['iPhone 15'] })` or an explicit `viewport`), mirroring the agent-browser `set device` run.
 
 ### 3. Run it, capturing artifacts
