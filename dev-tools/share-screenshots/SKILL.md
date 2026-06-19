@@ -13,7 +13,8 @@ This is the lightweight cousin of `e2e-test`: no user stories, no pass/fail, no 
 
 - **Always upload to CDN and return a link.** Screenshots + the gallery HTML upload via `scripts/upload-artifact.sh` (dependency-free node; reads `R2_*` env). If `R2_*` is missing, **fail loudly** with the fix - never return only local `file://` paths.
 - **Capture the current/visible state by default.** Only navigate to other screens (serve-sim taps / Maestro / agent-browser routes) when the user names specific screens to capture.
-- **Multi-app simulator etiquette (iOS):** target a specific simulator UDID/device name and dedicated ports; never run global simulator-erase or kill-all; only shut down the simulator you booted.
+- **Wait for the screen to settle before each shot - never shoot on a timer or right after a tap/navigation.** A frame grabbed mid-load is a blank/spinner screenshot. Gate the capture on the screen's anchor being visible first: web - `agent-browser wait --text "<anchor>"` (or a locator) before `screenshot`; iOS - a Maestro `assertVisible: "<anchor>"` (or poll the screen) before `simctl io screenshot`. This matters most when you navigate to a named screen before capturing.
+- **Multi-app simulator etiquette (iOS):** prefer a pinned simulator **UDID** over a device *name* (name-matching can boot a *different* device that shares the family name) and use dedicated ports; **confirm the intended app is the foreground app on that UDID before shooting** (`xcrun simctl listapps <UDID> | grep <bundleId>`, launch if needed) so you never screenshot the wrong app; never run global simulator-erase or kill-all; only shut down the simulator you booted.
 - **Fresh worktree?** Run the repo's setup script first (`node scripts/setup-codex-worktree.mjs`, else `pnpm install`) before flagging missing deps. Only stop-and-instruct for what a repo script can't fix (R2 creds, Xcode, system tools).
 
 ## Setup
