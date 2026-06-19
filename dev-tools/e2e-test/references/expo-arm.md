@@ -41,6 +41,8 @@ xcrun simctl boot <UDID>                                  # boot only that one
 ```
 Record the UDID for the run; pass it explicitly to every subsequent command.
 
+**What "a clean simulator" means:** a booted device is *not* a fresh-install state, and a reboot only clears runtime/recorder state, not onboarding-completion. If the test needs true first-run state, either `xcrun simctl erase <UDID>` **this device only** (never `erase all`) before installing, or force the flow through the app's own reviewer/replay entry (e.g. a sign-in token + `?replay=1`). State which you did in the report - don't imply a full wipe you didn't do.
+
 ### 2. Start the app (dedicated Metro/Expo port)
 
 Launch the Expo dev server on a non-default port so it can't collide with another app, and install/open the build on the chosen simulator. Confirm the app is up before driving.
@@ -61,17 +63,17 @@ Use serve-sim to observe while you write the flow; author element-based steps (`
 maestro --udid <UDID> test docs/testing/<feature>/flows/<label>-<slug>.yaml
 ```
 
-### 5. Record the run (`xcrun simctl io`, one pipeline for all iOS stories)
+### 5. Record the run (`xcrun simctl io`, ONE recording for the whole iOS flow)
 
-serve-sim does not record - capture the simulator screen directly. Start it **before** the flow / exploratory interaction, then stop it cleanly with SIGINT:
+serve-sim does not record - capture the simulator screen directly. **A single Maestro flow that walks several stories (3a/3b/3c) in one session produces ONE recording** - name it for the story group, `recording-<group>-<slug>.mp4` (e.g. `recording-3-ios-onboarding.mp4`); never copy that clip into fake per-story files (the audit accepts a group recording). Per-story distinction comes from the screenshots, not duplicated videos. Start it **before** the flow / exploratory interaction, then stop it cleanly with SIGINT:
 
 ```bash
-xcrun simctl io <UDID> recordVideo --codec h264 docs/testing/<feature>/recording-<label>-<slug>.mp4 &
+xcrun simctl io <UDID> recordVideo --codec h264 docs/testing/<feature>/recording-<group>-<slug>.mp4 &
 REC_PID=$!
 # ... run the Maestro flow (step 4) or do the exploratory interaction ...
 kill -INT $REC_PID      # SIGINT finalizes the file; a hard kill corrupts it
 ```
-This is the recorder for both scripted and exploratory stories; Maestro's built-in recording is not required. The `.mp4` extension makes `simctl` write an MP4 directly (no ffmpeg step needed).
+This is the recorder for both scripted and exploratory stories; Maestro's built-in recording is not required. The `.mp4` extension makes `simctl` write an MP4 directly (no ffmpeg step needed). If `recordVideo` errors with **"Host recording is already in progress,"** a prior recorder never finalized - find and `kill -INT` it (or reboot only this UDID) before retrying, and verify the `.mp4` actually landed (a flow can pass while the recorder silently produced no file).
 
 ### 6. Capture screenshots + logs
 
