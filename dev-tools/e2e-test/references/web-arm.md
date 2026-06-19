@@ -17,7 +17,7 @@ Exception - **agent-browser-only exploratory** verification (recording + screens
 
 ### 1. Walk the story with agent-browser
 
-Drive the flow live (Steps 3-4): configure viewport/device, authenticate, record the run, and at **every screen** do `snapshot -i` -> interact -> **wait for the screen to settle** -> **screenshot** (one per screen, named in order, e.g. `screenshot-1a-01-topic.png`). This is how you observe behavior and learn the exact locators before scripting - and the per-screen shots become the `userflows` frames.
+Drive the flow live (Steps 3-4): **pin the desktop viewport to a fixed size first** (`agent-browser set viewport 1440 900`, or `e2e-config.json` `defaults.viewport`) so frames don't clip on odd/HiDPI host displays - then for mobile `set device`; authenticate, record the run, and at **every screen** do `snapshot -i` -> interact -> **wait for the screen to settle** -> **screenshot** (one per screen, named in order, e.g. `screenshot-1a-01-topic.png`). This is how you observe behavior and learn the exact locators before scripting - and the per-screen shots become the `userflows` frames.
 
 **Wait before every screenshot** so frames aren't blank/mid-load: after navigating or interacting, gate the shot on the screen's anchor - `agent-browser wait --text "<text on the new screen>"` (or `wait --selector <locator>` / `wait --load networkidle`) before `screenshot`. Never screenshot immediately after a click or on a fixed `wait <ms>`.
 
