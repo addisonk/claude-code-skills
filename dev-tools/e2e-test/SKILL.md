@@ -70,7 +70,8 @@ Request analysis
 ├─ Retest specific stories?       → Steps 0, 3-9 filtered (--retest 1a,3b)
 ├─ Audit an existing test folder? → Step 9 only (--audit)
 ├─ Full workflow?                 → Steps 0-10 [DEFAULT]
-└─ Pipeline stage (mode:pipeline)?→ Steps 0-10, non-interactive (see Skill composition)
+├─ Pipeline stage (mode:pipeline)?→ Steps 0-10, non-interactive (see Skill composition)
+└─ Faster wall-clock (mode:parallel)?→ preflight once, then fan the arms out as subagents (see Parallel mode)
 ```
 
 ## Skills this composes with
@@ -90,6 +91,13 @@ Two rules when invoking any of them:
 - **If a referenced skill is NOT in that list, call it out - never fake its work.** Tell the user the exact missing skill name and that they should install it (point them at `/find-skills` or their skills marketplace). Then either continue only with the lower-fidelity fallback this skill documents and **flag it in `gaps`** ("authored without the `maestro-e2e` skill"), or stop that step. Never silently reimplement a missing specialist from memory.
 
 **Pipeline mode (`mode:pipeline`):** when run as a stage in a larger flow (e.g. `lfg`), run **non-interactively** - take every choice from `e2e-config.json` + documented defaults (never AskUserQuestion), and replace Step 10's interactive offers with **structured output** the caller can read (verdict, per-story pass/blocked, hosted report URL, findings split into product bugs vs harness friction + proposed issues). Still **invoke `realtalk`** for the disclosure, but **don't** open issues or fix-PRs yourself in pipeline mode - emit them for the orchestrator to act on.
+
+**Parallel mode (`mode:parallel`):** the three platform arms are independent once the dev stack is up, so fan them out to cut wall-clock:
+1. **Shared + serial first:** Step 0 (config/detect) + bring the dev stack up **once** (web, Metro, Convex/Trigger). The arms attach to this one running stack - subagents must **not** each start their own.
+2. **Fan out one subagent per active arm, concurrently:** `web-desktop` (Step 3), `web-mobile` (Step 4), `iOS` (Step 5). Each captures screenshots/recordings + authors its regression asset into the shared `docs/testing/<feature>/` folder. **Multi-app etiquette is mandatory:** each web arm uses a uniquely-named agent-browser session; the iOS arm owns the one simulator + serve-sim port; no subagent kills the shared dev stack or another arm's sessions. Story labels keep artifacts collision-free (web-desktop `1x`, web-mobile `2x`, iOS `3x`).
+3. **Barrier, then the serial tail (parent):** Step 6 (prune + `audit --pre` + upload), 7 (report), 8 (verify), 9 (audit), 10 (findings).
+
+A failed arm = its stories are `blocked` in the report (mark-and-continue), never an aborted run. **Wall-clock floor = preflight + slowest arm (usually iOS) + upload** - you can't beat the slowest arm, but you stop paying for the others serially. Opt-in (extra coordination + token cost); the default stays serial. Composes with `mode:pipeline` (a pipeline caller can request parallel arms).
 
 ## Platform detection
 
