@@ -27,6 +27,7 @@ Web: agent-browser walks the flow live; you author a Playwright test as the kept
 ## Critical rules (always enforced)
 
 - **If something needed is missing: bootstrap what a repo script can fix, stop and instruct for the rest - never hack around, fake, or give up.** First run the repo's own setup script for fresh-worktree deps (`node scripts/setup-codex-worktree.mjs`, else `pnpm install`; see Setup). For what a repo script can't provide - system tools, credentials, a running dev server, a test account - halt that step and tell the user exactly what to add and the command to add it. Never fabricate or placeholder evidence, silently skip a story, or downgrade the output to route around the gap. A real report reflects only what actually ran; anything blocked or unverifiable goes in the `gaps` block with the reason.
+- **A failing story is a finding, not a stop. Test observes; it never fixes product code mid-run and never halts on the first bug.** When a story fails, capture the evidence (screenshot, log, repro), mark it failed in `flow-results`, and **continue** - a QA sweep's value is the full picture, so one bug must not abort the rest. If a failure blocks downstream stories, mark those `blocked` (not silently skipped). Only *harness* friction (env, tooling, a flaky driver) may be worked around to keep testing - never the product code under test, and disclose every workaround. Fixing discovered bugs is a separate, opt-in, reviewable step (Step 10), the run **produces findings, it does not patch the app.**
 - **The report is a hosted HTML QA report, never markdown.** Build it by copying the closest example template and editing only its `report-data` JSON (Step 7). See [report-blocks.md](references/report-blocks.md).
 - **Always upload evidence to CDN.** Every screenshot, MP4, log, Maestro report/YAML, and the report HTML uploads via `scripts/upload-artifact.sh` (dependency-free node; reads `R2_*` env for endpoint/bucket/public URL + creds). The report references absolute CDN URLs only - never `file://` or local paths. Missing `R2_*` env → **fail loudly** and point the user to `~/.claude/settings.json`; never fall back to local. See [uploader.md](references/uploader.md).
 - **Five report blocks are mandatory:** `report` header, `verdict`, `flow-results`, a `recording` per story, and `gaps`. Everything else renders only when real evidence exists.
@@ -88,6 +89,7 @@ E2E Test Progress:
 - [ ] Step 7: Build + upload the HTML QA report
 - [ ] Step 8: Verify hosted report + assets return 200
 - [ ] Step 9: Audit test folder
+- [ ] Step 10: Findings & next steps (issues / fix-as-PR / rerun)
 ```
 
 ### Step 0 - Config, detection, questions
@@ -139,9 +141,17 @@ bash ${SKILL_DIR}/scripts/audit-test-folder.sh docs/testing/<feature-name>
 ```
 Validates story↔artifact alignment, mandatory recordings, the HTML report, and Maestro flows. Fix flagged issues before reporting done.
 
+### Step 10 - Findings & next steps
+
+Testing is done; now triage what it found. **Never fix product code during the run** - this is the separate, opt-in step.
+
+1. **List findings.** For each failed/blocked story or product bug: one-line title, repro steps, the evidence URL (hosted screenshot/recording), severity, and affected flow. Keep genuine *product bugs* separate from *harness friction* (a tooling gap to fix in the harness, not a product issue), and list the harness workarounds you applied so nothing is hidden. A short `/realtalk`-style honesty pass here is ideal.
+2. **Offer issues; don't auto-file.** Draft ready-to-create GitHub issues (title + repro + evidence link); ask before filing. Use the `github-project-management` skill if present.
+3. **Offer the fix loop (human-gated).** Ask whether to: open issues, dispatch a fix agent per finding, or just hand over the report. If the user opts to fix, each fix lands as its **own PR** (reviewable, never silently merged), then **`--retest <labels>`** reruns only the affected stories on the fix to confirm green. The validated pattern is **red on main → fix as PR → green on the fix → merge** - never patch the app inside the test run.
+
 ## Quality standards
 
-Every completed run: all stories checked off or marked blocked with a reason; a recording per story; HTML report with the five mandatory blocks; all media hosted and returning 200; audit passes; sessions/simulators closed (respecting etiquette).
+Every completed run: all stories checked off or marked blocked with a reason; a recording per story; HTML report with the five mandatory blocks; all media hosted and returning 200; audit passes; sessions/simulators closed (respecting etiquette); **failed stories surfaced as findings with proposed issues (Step 10), never silently fixed or worked around.**
 
 ## Progressive references (load on demand)
 
