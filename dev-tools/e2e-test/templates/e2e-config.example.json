@@ -6,11 +6,15 @@
     "keyPrefix": "qa-artifacts"
   },
 
+  "_expo_simulator_note": "Prefer 'simulatorUdid' over the 'simulator' name. Device-name matching can boot a DIFFERENT device that shares the family name (e.g. a stray 'Diem iPhone 17' instead of the intended Pro Max) and silently run the test on the wrong sim. Pin the exact UDID (xcrun simctl list devices) and the agent targets it everywhere + runs a bundle-id identity preflight before each Maestro leg.",
+  "_expo_reset_note": "OPTIONAL. A deep link or supported test endpoint that returns the app to a fresh onboarding/first-run state, so the agent doesn't trial-and-error deep links or fight the in-app Settings reset.",
   "expo": {
     "appDir": "apps/mobile",
     "metroPort": 8082,
     "serveSimPort": 3210,
-    "simulator": "iPhone 16 Pro"
+    "simulator": "iPhone 16 Pro",
+    "simulatorUdid": "REPLACE-WITH-UDID",
+    "reset": "podist:///?replay=1"
   },
 
   "theme": {

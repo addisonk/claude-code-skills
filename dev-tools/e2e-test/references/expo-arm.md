@@ -41,6 +41,15 @@ xcrun simctl boot <UDID>                                  # boot only that one
 ```
 Record the UDID for the run; pass it explicitly to every subsequent command.
 
+**Pin the UDID in `e2e-config.json` (`expo.simulatorUdid`); don't let the tooling pick by name.** Expo / `simctl` device-*name* matching can boot a different device that shares the family name (e.g. a stray "Diem iPhone 17" instead of the intended "iPhone 17 Pro Max"), silently running the whole test on the wrong sim. Target the exact UDID everywhere.
+
+**Identity preflight before each Maestro leg.** Confirm the app you intend to drive is actually installed and frontmost on *that* UDID before handing off to Maestro, so a flow never runs against the wrong app/device:
+```bash
+xcrun simctl listapps <UDID> | grep <bundleId>        # installed on this exact device?
+xcrun simctl launch <UDID> <bundleId>                 # foreground it
+# then verify it's frontmost (serve-sim frame / a Maestro assertVisible on a known app anchor)
+```
+
 ### 2. Start the app (dedicated Metro/Expo port)
 
 Launch the Expo dev server on a non-default port so it can't collide with another app, and install/open the build on the chosen simulator. Confirm the app is up before driving.
@@ -60,6 +69,8 @@ Use serve-sim to observe while you write the flow; author element-based steps (`
 # docs/testing/<feature>/flows/<label>-<slug>.yaml
 maestro --udid <UDID> test docs/testing/<feature>/flows/<label>-<slug>.yaml
 ```
+
+**Verifying something the run just created (e.g. a published episode):** assert it by its *own identity*, not by ordinal position. Capture the artifact's identity during the run (write the published title/id to a file like `published-episode.json`), then in the flow **reset scroll to top**, `assertVisible` that exact title/id, and tap a *stable* control (a labelled "Play latest episode" button, not `row-first`). Positional testIDs like `episode-row-first` drift to a neighboring row when the feed reorders or is scrolled, which false-fails the last mile of an otherwise-passing live run.
 
 ### 5. Record the run (`xcrun simctl io`, one pipeline for all iOS stories)
 
