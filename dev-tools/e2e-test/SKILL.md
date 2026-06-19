@@ -68,8 +68,27 @@ Request analysis
 ├─ Test existing stories?         → Steps 0, 3-9 (--test-only)
 ├─ Retest specific stories?       → Steps 0, 3-9 filtered (--retest 1a,3b)
 ├─ Audit an existing test folder? → Step 9 only (--audit)
-└─ Full workflow?                 → Steps 0-9 [DEFAULT]
+├─ Full workflow?                 → Steps 0-10 [DEFAULT]
+└─ Pipeline stage (mode:pipeline)?→ Steps 0-10, non-interactive (see Skill composition)
 ```
+
+## Skills this composes with
+
+This skill is the spine; it **summons specialists** at the right step rather than reimplementing them:
+
+| Skill | When |
+|-------|------|
+| `playwright-test` + `playwright-best-practices` | author/run web Playwright specs (Step 3-4) |
+| `maestro-e2e` | author iOS Maestro flows (Step 5) |
+| `realtalk` | end-of-run honesty pass (Step 10) |
+| `github-project-management` | file findings as issues (Step 10, optional) |
+
+Two rules when invoking any of them:
+
+- **Resolve the name verbatim against the available-skills list the host provides** - some platforms namespace skills (e.g. `compound-engineering:ce-...`), others use the bare name; a guessed short form fails. Match a listed entry before calling Skill/Task.
+- **If a referenced skill is NOT in that list, call it out - never fake its work.** Tell the user the exact missing skill name and that they should install it (point them at `/find-skills` or their skills marketplace). Then either continue only with the lower-fidelity fallback this skill documents and **flag it in `gaps`** ("authored without the `maestro-e2e` skill"), or stop that step. Never silently reimplement a missing specialist from memory.
+
+**Pipeline mode (`mode:pipeline`):** when run as a stage in a larger flow (e.g. `lfg`), run **non-interactively** - take every choice from `e2e-config.json` + documented defaults (never AskUserQuestion), and replace Step 10's interactive offers with **structured output** the caller can read (verdict, per-story pass/blocked, hosted report URL, findings split into product bugs vs harness friction + proposed issues). Still **invoke `realtalk`** for the disclosure, but **don't** open issues or fix-PRs yourself in pipeline mode - emit them for the orchestrator to act on.
 
 ## Platform detection
 
@@ -159,7 +178,7 @@ Validates story↔artifact alignment, mandatory recordings, the HTML report, and
 
 Testing is done; now triage what it found. **Never fix product code during the run** - this is the separate, opt-in step.
 
-1. **List findings.** For each failed/blocked story or product bug: one-line title, repro steps, the evidence URL (hosted screenshot/recording), severity, and affected flow. Keep genuine *product bugs* separate from *harness friction* (a tooling gap to fix in the harness, not a product issue), and list the harness workarounds you applied so nothing is hidden. A short `/realtalk`-style honesty pass here is ideal.
+1. **List findings.** For each failed/blocked story or product bug: one-line title, repro steps, the evidence URL (hosted screenshot/recording), severity, and affected flow. Keep genuine *product bugs* separate from *harness friction* (a tooling gap to fix in the harness, not a product issue), and list the harness workarounds you applied so nothing is hidden. **Invoke the `realtalk` skill** here for the honesty pass - it verifies what actually happened (git state, whether PRs merged, files/processes left behind) and discloses buried friction.
 2. **Offer issues; don't auto-file.** Draft ready-to-create GitHub issues (title + repro + evidence link); ask before filing. Use the `github-project-management` skill if present.
 3. **Offer the fix loop (human-gated).** Ask whether to: open issues, dispatch a fix agent per finding, or just hand over the report. If the user opts to fix, each fix lands as its **own PR** (reviewable, never silently merged), then **`--retest <labels>`** reruns only the affected stories on the fix to confirm green. The validated pattern is **red on main → fix as PR → green on the fix → merge** - never patch the app inside the test run.
 
