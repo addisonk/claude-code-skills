@@ -21,14 +21,20 @@ This is the lightweight cousin of `e2e-test`: no user stories, no pass/fail, no 
 
 - **R2 env** - `R2_ENDPOINT`, `R2_BUCKET`, `R2_PUBLIC_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`. Store in `~/.claude/settings.json` `env` (and your Codex env). The uploader needs no aws CLI.
 - **Node** - the uploader + gallery builder.
-- **Web** - agent-browser. **iOS** - Xcode + a booted simulator (`xcrun simctl`).
+- **Web** - agent-browser (your eyes *and* the capture tool). **iOS** - Xcode + a booted simulator (`xcrun simctl` does the actual capture), plus **serve-sim** (`npx serve-sim`) as your **eyes**: it streams the sim to a browser preview so you can see the current state, navigate to the screens worth capturing, and frame/settle each shot before you grab it - instead of blind-firing `simctl io screenshot`.
 
 ## Workflow
 
 1. **Pick the platform from the work.** Web → agent-browser; Expo iOS → the simulator. Do both if the work spans both.
 2. **Capture** into `docs/screenshots/<name>/`:
-   - Web: `agent-browser screenshot docs/screenshots/<name>/<slug>.png` (current page, or named routes).
-   - iOS: `xcrun simctl io <udid> screenshot docs/screenshots/<name>/<slug>.png` (current screen; navigate only if specific screens were requested).
+   - Web: `agent-browser screenshot docs/screenshots/<name>/<slug>.png` (current page, or named routes) - agent-browser is already your eyes here.
+   - iOS: **bring up serve-sim as your eyes first so you're not shooting blind.** Start it and open the preview to *see* the sim, navigate to the screens worth capturing, and confirm each is the right, settled screen - then grab the actual file with `simctl`:
+     ```bash
+     npx serve-sim "<device>" -d <udid> --detach -q     # JSON: open the "url" (preview UI), never the raw "streamUrl"/:3100/stream.mjpeg
+     # watch the preview, navigate (Maestro / serve-sim taps), confirm the screen
+     xcrun simctl io <udid> screenshot docs/screenshots/<name>/<slug>.png   # serve-sim only views/streams; simctl saves the file
+     ```
+     Navigate only if specific screens were requested; otherwise capture the current screen. Stop serve-sim on cleanup (`npx serve-sim --kill <udid>`, never bare `--kill`).
 3. **Upload each shot** and collect the URLs:
    ```bash
    bash scripts/upload-artifact.sh docs/screenshots/<name>/<slug>.png   # prints the CDN URL
