@@ -6,11 +6,13 @@
     "keyPrefix": "qa-artifacts"
   },
 
+  "_expo_reset_note": "OPTIONAL. A deep link or supported test endpoint that returns the app to a fresh onboarding/first-run state, so the agent doesn't trial-and-error deep links or fight the in-app Settings reset.",
   "expo": {
     "appDir": "apps/mobile",
     "metroPort": 8082,
     "serveSimPort": 3210,
-    "simulator": "iPhone 16 Pro"
+    "simulator": "iPhone 16 Pro",
+    "reset": "podist:///?replay=1"
   },
 
   "theme": {

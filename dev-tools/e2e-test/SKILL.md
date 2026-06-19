@@ -58,6 +58,8 @@ Two kinds of "missing", handled differently:
 
 Before asking anything, read `docs/testing/e2e-config.json` if present and use it as defaults. See [templates/e2e-config.example.json](templates/e2e-config.example.json) for the full shape. The `upload` block is **optional** (it overrides the `R2_*` env defaults per project); `theme`/`auth`/`defaults`/`expo` are optional too. If absent, ask the manual questions; upload still works off the `R2_*` env.
 
+If `expo.reset` is set (a deep link or supported test endpoint that returns the app to a fresh onboarding/first-run state, e.g. `"reset": "podist:///?replay=1"`), **use it** to reach first-run instead of rediscovering it - don't trial-and-error deep-link shapes or fight the in-app Settings reset. If it's not set and you have to discover one, tell the user to add it to `e2e-config.json` so the next run is instant.
+
 ## Decision tree (execute first)
 
 ```
@@ -86,7 +88,7 @@ E2E Test Progress:
 - [ ] Step 3: Test web desktop stories
 - [ ] Step 4: Test web mobile stories
 - [ ] Step 5: Test Expo iOS stories (if app exists)
-- [ ] Step 6: Upload all artifacts to CDN
+- [ ] Step 6: Prep (prune failed artifacts + `audit --pre`) + upload to CDN
 - [ ] Step 7: Build + upload the HTML QA report
 - [ ] Step 8: Verify hosted report + assets return 200
 - [ ] Step 9: Audit test folder
@@ -116,9 +118,17 @@ Per story: walk the flow live with agent-browser (configure viewport/device → 
 
 Drive with Maestro for element location/assertions; use serve-sim for coordinate gestures (`tap`/`gesture`/`button`/`type`), and record the screen with `xcrun simctl io <udid> recordVideo`. The canonical per-story deliverable is **a rerunnable Maestro flow + a `simctl` screen recording**. serve-sim-only exploratory verification (recording + screenshots, no flow) is allowed for stories too awkward to script - flag those "not yet regression-covered" in the report's `gaps` block. Full workflow, ports, UDID allocation, and etiquette: [expo-arm.md](references/expo-arm.md).
 
-### Step 6 - Upload artifacts
+### Step 6 - Prep + upload artifacts
 
-Upload every artifact and capture the returned absolute CDN URLs for the report:
+**Before uploading** (this saves re-uploading + re-verifying every asset later):
+1. **Prune failed-attempt / debug artifacts** so only the final *passing* evidence ships - delete `screenshot-debug-*`, `*-failed-*`, probe clips, and any earlier failed-setup screenshots/logs from the folder.
+2. **Run the pre-upload audit locally** to catch naming / recording / checkbox issues *now*, not after 70 uploads:
+   ```bash
+   bash ${SKILL_DIR}/scripts/audit-test-folder.sh --pre docs/testing/<feature-name>
+   ```
+   Fix everything it flags before you upload a single file.
+
+Then upload every artifact and capture the returned absolute CDN URLs for the report:
 ```bash
 bash ${SKILL_DIR}/scripts/upload-artifact.sh docs/testing/<feature-name>/<file>
 ```
@@ -135,6 +145,8 @@ Confirm the hosted report and every referenced asset return `200` with the right
 bash ${SKILL_DIR}/scripts/upload-artifact.sh --verify <url> [<url> ...]
 ```
 Then **actually open the hosted `report.html` and confirm it renders** - load it in agent-browser (or the Codex `@browser` plugin) and screenshot it, eyeballing that blocks, images, and video embeds resolve. A `200` proves the file uploaded, not that the page renders or that its media URLs resolve; never call the report "green" on `200` alone.
+
+Once verify passes, the **bulky local evidence is redundant** - screenshots, `*.mp4`/`*.webm`, and logs all live on R2 now. Prune those local binaries so the folder doesn't balloon (the last run left ~69 MB untracked); **keep** the lightweight rerunnable source (`specs/`, `flows/`, `user-stories.md`, `report.html`, the upload manifest). If `docs/testing/` isn't already in the repo's `.gitignore`, recommend adding it so evidence runs never show as "dirty" or get accidentally committed.
 
 ### Step 9 - Audit
 

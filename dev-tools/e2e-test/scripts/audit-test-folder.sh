@@ -15,8 +15,15 @@
 
 set -euo pipefail
 
-FOLDER="${1:?Usage: audit-test-folder.sh <test-folder-path>}"
+# --pre: pre-upload local check. Validates naming/structure/recordings/checkboxes
+# on local files and treats a not-yet-built report.html as INFO, not FAIL - run it
+# BEFORE uploading so naming fixes don't cost a re-upload + re-verify of every asset.
+PRE=false
+ARGS=()
+for a in "$@"; do case "$a" in --pre) PRE=true ;; *) ARGS+=("$a") ;; esac; done
+FOLDER="${ARGS[0]:?Usage: audit-test-folder.sh [--pre] <test-folder-path>}"
 [ -d "$FOLDER" ] || { echo "ERROR: Folder not found: $FOLDER"; exit 1; }
+[ "$PRE" = true ] && echo "(--pre: local pre-upload check; report/hosted checks skipped)"
 
 STORIES_FILE="$FOLDER/user-stories.md"
 [ -f "$STORIES_FILE" ] || { echo "ERROR: user-stories.md not found in $FOLDER"; exit 1; }
@@ -129,6 +136,8 @@ fi
 echo "--- Report ---"
 if [ -f "$FOLDER/report.html" ]; then
   echo "OK: report.html found"
+elif [ "$PRE" = true ]; then
+  echo "INFO (--pre): report.html not built yet - build + verify it after upload"
 else
   echo "FAIL: report.html not found (the report must be the hosted HTML QA report)"; note_issue
 fi
