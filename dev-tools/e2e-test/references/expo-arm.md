@@ -57,9 +57,11 @@ Launch the Expo dev server on a non-default port so it can't collide with anothe
 ### 3. Start serve-sim on a dedicated port
 
 ```bash
-npx serve-sim "<device name>" -p <ourPort> --detach     # detached (daemon) stream for the chosen device
+npx serve-sim "<device name>" -p <ourPort> --detach -q   # JSON: {"url":..., "streamUrl":..., ...}
 ```
-serve-sim's defaults are preview `:3200` and stream `:3100`; `-p` sets the starting port so concurrent runs don't clash. Open the preview in agent-browser only to **watch/screenshot** the stream - not to drive.
+`-p` sets the starting port so concurrent runs don't clash (defaults preview `:3200`, stream `:3100`). **Open the `url` from the `-q` JSON - the preview UI - and never the raw `streamUrl`/`:3100/stream.mjpeg`.** That endpoint is the binary MJPEG the preview *consumes*, not a viewable page, so a browser pointed at it shows nothing usable (a common dead end). Don't hard-code `:3100` or `:3200` either - read the actual `url`/`streamUrl` from the JSON, since `-p` shifts them. Open the preview only to **watch/screenshot**, not to drive.
+
+**Optional single-origin preview:** serve-sim also ships a Metro/dev-server middleware - `import { simMiddleware } from "serve-sim/middleware"` then `app.use(simMiddleware({ basePath: "/.sim" }))` in `metro.config.js` - so the preview is served at `<metroOrigin>/.sim` (e.g. `http://localhost:8082/.sim`). Convenient if you want one origin, but **not required**: the standalone `url` works with no config change.
 
 ### 4. Author + run the Maestro flow
 
