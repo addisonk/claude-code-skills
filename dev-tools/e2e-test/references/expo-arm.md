@@ -43,6 +43,8 @@ Record the UDID for the run; pass it explicitly to every subsequent command.
 
 **What "a clean simulator" means:** a booted device is *not* a fresh-install state, and a reboot only clears runtime/recorder state, not onboarding-completion. If the test needs true first-run state, either `xcrun simctl erase <UDID>` **this device only** (never `erase all`) before installing, or force the flow through the app's own reviewer/replay entry (e.g. a sign-in token + `?replay=1`). State which you did in the report - don't imply a full wipe you didn't do.
 
+**Use the configured reset entry; don't rediscover it.** If `expo.reset` is set in `e2e-config.json` (a deep link or test endpoint to fresh onboarding), open it directly - `xcrun simctl openurl <UDID> "<expo.reset>"` - instead of trial-and-erroring deep-link shapes or fighting the in-app Settings reset (a known time sink). If you had to discover the reset path this run, tell the user to add it to `e2e-config.json` so the next run is instant.
+
 ### 2. Start the app (dedicated Metro/Expo port)
 
 Launch the Expo dev server on a non-default port so it can't collide with another app, and install/open the build on the chosen simulator. Confirm the app is up before driving.
