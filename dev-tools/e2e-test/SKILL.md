@@ -31,7 +31,7 @@ Web: agent-browser walks the flow live; you author a Playwright test as the kept
 - **The report is a hosted HTML QA report, never markdown.** Build it by copying the closest example template and editing only its `report-data` JSON (Step 7). See [report-blocks.md](references/report-blocks.md).
 - **Always upload evidence to CDN.** Every screenshot, MP4, log, Maestro report/YAML, and the report HTML uploads via `scripts/upload-artifact.sh` (dependency-free node; reads `R2_*` env for endpoint/bucket/public URL + creds). The report references absolute CDN URLs only - never `file://` or local paths. Missing `R2_*` env → **fail loudly** and point the user to `~/.claude/settings.json`; never fall back to local. See [uploader.md](references/uploader.md).
 - **Five report blocks are mandatory:** `report` header, `verdict`, `flow-results`, a `recording` per story, and `gaps`. Everything else renders only when real evidence exists.
-- **A screen recording per story is mandatory.**
+- **A screen recording is mandatory for every story; one continuous recording may cover a story group run in a single flow.** Web stories record per-test (Playwright). A single iOS Maestro flow that walks 3a/3b/3c in one session is **one** recording named for the group (`recording-3-...`), never copied into fake per-story files. Likewise a shared Playwright spec / Maestro flow can cover several stories (`specs/web-...`, `maestro/ios-...`); the audit accepts group/shared coverage, so never pad with per-label symlinks.
 - **Screenshot every screen, not just once per story.** The `userflows` block is the screen-by-screen sequence: capture a screenshot at *each distinct screen/state* the flow passes through (every navigation, form step, picker, modal, confirmation, result) and put them all in `userflows`. A 6-screen onboarding flow yields ~6 frames, not 1 - that screen-by-screen trail is the whole point of a userflow.
 - **Multi-app simulator etiquette:** target a specific simulator UDID/device name and a dedicated serve-sim/Metro port. Never run global simulator-erase or kill-all. Before stopping any simulator/Metro/serve-sim process, identify the owning app + port. See [expo-arm.md](references/expo-arm.md).
 - **Web driver: agent-browser, or the Codex `@browser` skill when running in Codex - never the user's real Chrome.** Drive a headless/sandboxed automation browser. If `agent-browser` isn't on PATH (common in Codex), use Codex's `@browser` plugin instead of falling back to the user's interactive Chrome. Never open a real desktop Chrome to drive the app or to view a serve-sim preview - iOS screenshots come from `xcrun simctl io ... screenshot`, not a browser.
@@ -133,6 +133,7 @@ Confirm the hosted report and every referenced asset return `200` with the right
 ```bash
 bash ${SKILL_DIR}/scripts/upload-artifact.sh --verify <url> [<url> ...]
 ```
+Then **actually open the hosted `report.html` and confirm it renders** - load it in agent-browser (or the Codex `@browser` plugin) and screenshot it, eyeballing that blocks, images, and video embeds resolve. A `200` proves the file uploaded, not that the page renders or that its media URLs resolve; never call the report "green" on `200` alone.
 
 ### Step 9 - Audit
 

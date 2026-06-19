@@ -51,19 +51,26 @@ RECORDINGS=$(find "$FOLDER" -name 'recording-*.mp4' 2>/dev/null | sort || true)
 REC_COUNT=$(echo "$RECORDINGS" | grep -c . || true)
 echo "--- Recordings (mandatory) ---"
 echo "Total recordings: $REC_COUNT"
+# A label like 3a is covered by recording-3a-* OR a single group recording
+# recording-3-* (one continuous clip covering 3a/3b/3c, typical for one iOS Maestro
+# flow). This avoids faking per-story video copies of a single run.
 MISSING_REC=""
 for label in $LABELS; do
-  echo "$RECORDINGS" | grep -q "recording-${label}-" || MISSING_REC="$MISSING_REC $label"
+  group="${label%[a-z]}"
+  echo "$RECORDINGS" | grep -qE "recording-(${label}|${group})-" || MISSING_REC="$MISSING_REC $label"
 done
 if [ -n "$MISSING_REC" ]; then
-  echo "FAIL: Stories missing a recording:$MISSING_REC"; note_issue
+  echo "FAIL: Stories missing a recording (per-story or a group recording-<N>-):$MISSING_REC"; note_issue
 else
   echo "OK: every story has a recording"
 fi
 for rec in $RECORDINGS; do
   fname=$(basename "$rec"); matched=false
-  for label in $LABELS; do echo "$fname" | grep -q "recording-${label}-" && { matched=true; break; }; done
-  [ "$matched" = false ] && { echo "WARN: orphan recording (no matching story): $fname"; note_issue; }
+  for label in $LABELS; do
+    group="${label%[a-z]}"
+    echo "$fname" | grep -qE "recording-(${label}|${group})-" && { matched=true; break; }
+  done
+  [ "$matched" = false ] && { echo "WARN: orphan recording (no matching story/group): $fname"; note_issue; }
 done
 echo ""
 
@@ -87,10 +94,13 @@ echo ""
 # --- Maestro flows for iOS stories (informational) ---
 if [ -n "$IOS_LABELS" ]; then
   echo "--- Maestro flows (iOS) ---"
-  FLOWS=$(find "$FOLDER/flows" \( -name '*.yaml' -o -name '*.yml' \) 2>/dev/null | sort || true)
+  # Look in flows/ or maestro/; a label is covered by a per-label file, a group
+  # file (3-*), or one shared iOS flow (ios-*) - no need for per-label symlinks.
+  FLOWS=$(find "$FOLDER/flows" "$FOLDER/maestro" \( -name '*.yaml' -o -name '*.yml' \) 2>/dev/null | sort || true)
   for label in $IOS_LABELS; do
-    if echo "$FLOWS" | grep -q "/${label}-"; then
-      echo "OK: iOS story $label has a Maestro flow"
+    group="${label%[a-z]}"
+    if echo "$FLOWS" | grep -qE "/(${label}|${group}|ios)[-.]"; then
+      echo "OK: iOS story $label has a Maestro flow (per-label, group, or one shared flow)"
     else
       echo "INFO: iOS story $label has no Maestro flow - must be flagged 'not yet regression-covered' in the report gaps block"
     fi
@@ -102,9 +112,12 @@ fi
 if [ -n "$WEB_LABELS" ]; then
   echo "--- Playwright tests (web) ---"
   SPECS=$(find "$FOLDER/specs" \( -name '*.spec.ts' -o -name '*.spec.js' \) 2>/dev/null | sort || true)
+  # Covered by a per-label spec, a group spec (1-*), or one shared web spec
+  # (web-*) covering several stories - no need for per-label symlinks.
   for label in $WEB_LABELS; do
-    if echo "$SPECS" | grep -q "/${label}-"; then
-      echo "OK: web story $label has a Playwright test"
+    group="${label%[a-z]}"
+    if echo "$SPECS" | grep -qE "/(${label}|${group}|web)[-.]"; then
+      echo "OK: web story $label has a Playwright test (per-label, group, or one shared spec)"
     else
       echo "INFO: web story $label has no Playwright test - must be flagged 'not yet regression-covered' in the report gaps block"
     fi
