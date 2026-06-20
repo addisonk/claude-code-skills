@@ -29,6 +29,7 @@ Open-source skills for [Claude Code](https://claude.ai/code).
 | [openclaw](agents/openclaw) | Expert guide for crafting OpenClaw agent workspace files (SOUL.md, AGENTS.md, TOOLS.md) |
 | [orchestrating-swarms](agents/orchestrating-swarms) | Multi-agent orchestration using Claude Code's TeammateTool and Task system |
 | [research-collector](agents/research-collector) | Turn an idea into a curated, indexed corpus of prior art via fan-out research, idempotent download, and semantic indexing (Software Factory pattern) |
+| [task-orchestrator-loop](agents/task-orchestrator-loop) | Reusable orchestration loop for coding, bugfix, UI, and design tasks through implementation, verification, review, fix, and re-review cycles |
 
 ### Dev Tools
 
