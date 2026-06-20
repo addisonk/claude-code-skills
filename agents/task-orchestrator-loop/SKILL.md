@@ -11,6 +11,8 @@ Reusable orchestration for driving coding, bugfix, UI, and design tasks to compl
 
 Own the outcome, state, and next action. Keep moving through implementation, verification, review, fix, and re-review loops until the task is done or blocked by a real human gate.
 
+Do not stop on newly discovered downstream findings. Add them to state, classify them, and continue the loop unless they hit a real human gate.
+
 Implementation workers own one bounded chunk. Review workers own independent review. The orchestrator owns decomposition, state, proof, gating decisions, and final reporting.
 
 Workers must not create subworkers unless the orchestrator explicitly authorizes it.
@@ -124,12 +126,25 @@ Run this loop until done or gated:
 3. Verify the chunk with tests, lint, typecheck, build, app run, screenshots, reproduction scripts, or logs as appropriate.
 4. Collect proof and attach it to the chunk.
 5. Send the chunk to independent review when available.
-6. Classify review findings.
-7. Fix valid findings in a bounded fix chunk.
-8. Re-run targeted verification.
-9. Re-review until findings are resolved, deferred with rationale, or escalated to a human gate.
-10. Move to the next chunk.
-11. Finish by proving the whole task, cleaning up owned processes, updating PRs, and reporting.
+6. Treat each review result as new input to the loop.
+7. If no independent reviewer is available, perform a single-thread review checkpoint and classify any findings.
+8. If review hits a real human gate, update state and stop in `waiting`.
+9. If the reviewer requests changes:
+   - classify the feedback
+   - if it is actionable feedback on the current PR, send it back to the implementation worker
+   - have the worker fix it, push, rerun focused validation, and return proof
+   - re-review the new head
+   - continue until approved, looping, or gated
+10. If review exposes a new downstream issue:
+   - add it as a new finding
+   - classify it
+   - decide whether it belongs in the current PR or should be queued as the next chunk
+   - continue the loop
+11. If the reviewer approves:
+   - update state
+   - move to the next chunk
+   - stop at merge gate unless the user explicitly authorized merging
+12. Finish by proving the whole task, cleaning up owned processes, updating PRs, and reporting.
 
 Stop only when the state says `done`, `blocked`, or `waiting` on a real human gate.
 
@@ -245,16 +260,19 @@ Still ask before:
 
 ## 15. Anti-thrash rules
 
-Avoid loops that create motion without convergence:
-
-- Do not alternate implementation and review indefinitely. After two cycles on the same finding, classify the blocker and pick a new action.
-- Do not rerun broad test suites after every tiny edit when targeted verification is enough; run broad verification at phase boundaries.
-- Do not spawn more workers than the repo, task, or review surface can absorb.
-- Do not split chunks so small that integration risk moves to the orchestrator.
-- Do not keep fixing nice-to-have review comments unless they are explicitly in scope.
-- Do not rewrite working code just to satisfy reviewer taste.
-- Do not expand scope to adjacent product decisions without a human gate.
-- Do not treat flaky tools as failure until one bounded retry or repair has been attempted.
+- One chunk per implementation worker.
+- One concern per PR when possible.
+- Do not create broad cleanup PRs unless the task requires it.
+- Do not keep retrying blindly.
+- Do not stop just because review still found issues.
+- Treat each review result as new input to the loop.
+- If review finds actionable issues, send them back to the implementation worker, fix, rerun focused validation, and re-review the new head.
+- If review exposes a new downstream issue, classify it as a new finding and decide whether it belongs in the current PR or the next PR.
+- If review feedback is vague, contradictory, or not actionable, ask the reviewer for concrete file-level required changes.
+- Mark a finding as stuck only when the same core objection remains after multiple focused fixes, or when the implementation worker repeats the same failed approach.
+- If a fix is refuted, revert it or isolate it before continuing.
+- Do not stack unrelated work on top of an unverified broken state.
+- Prefer boring, local fixes over architectural rewrites.
 
 ## 16. State block
 
